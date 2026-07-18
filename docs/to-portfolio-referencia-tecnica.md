@@ -350,10 +350,10 @@ Prioridade média:
 | Frame | Arquivo | O que mostra |
 |---|---|---|
 | Gate | `docs/assets/to-portfolio-ref/01-audio-gate.png` | OUTPUT ROUTING ON/OFF |
-| Home viva | `docs/assets/to-portfolio-ref/04-after-mouse.png` | WebGL + HUD + `[REBUILD]` |
-| Work | `docs/assets/to-portfolio-ref/05-click-log.png` | EXPT. LOGS / cases |
-| About | `docs/assets/to-portfolio-ref/05-click-about.png` | PROFILE/STACK |
-| Scroll | `docs/assets/to-portfolio-ref/07-scrolled-mid.png` | Progressão da timeline |
+| Home viva | `docs/assets/to-portfolio-ref/04-after-mouse.jpg` | WebGL + HUD + `[REBUILD]` |
+| Work | `docs/assets/to-portfolio-ref/05-click-log.jpg` | EXPT. LOGS / cases |
+| About | `docs/assets/to-portfolio-ref/05-click-about.jpg` | PROFILE/STACK |
+| Scroll | `docs/assets/to-portfolio-ref/07-scrolled-mid.jpg` | Progressão da timeline |
 
 ---
 
