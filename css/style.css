@@ -501,8 +501,8 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
   border: 1px solid #fff;
   max-width: min(280px, 36vw);
 }
-.hud-tl { top: calc(var(--nav-h) + 18px); left: max(20px, calc(50% - 540px)); }
-.hud-tr { top: calc(var(--nav-h) + 18px); right: max(20px, calc(50% - 540px)); text-align: right; }
+.hud-tl { top: calc(var(--nav-h) + 28px); left: max(20px, calc(50% - 540px)); }
+.hud-tr { top: calc(var(--nav-h) + 28px); right: max(20px, calc(50% - 540px)); text-align: right; }
 .status-dot {
   display: inline-block;
   width: 7px; height: 7px;
