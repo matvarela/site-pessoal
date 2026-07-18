@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Matheus Varela Mendes — Especialista em Dados e Engenheiro de Analytics. Interface system-style interativa com experiência em Microsoft Fabric, Power BI e arquitetura de dados.">
+  <meta name="description" content="Matheus Varela Mendes — Especialista em Dados. Portfólio system-failure: gate de áudio, kernel panic procedural e interface monocromática.">
   <meta name="author" content="Matheus Varela Mendes">
   <meta name="theme-color" content="#000000">
-  <meta property="og:title" content="Matheus Varela Mendes — Especialista em Dados">
-  <meta property="og:description" content="Engenheiro de Analytics com foco em Microsoft Fabric, Power BI e arquitetura de dados em nuvem.">
+  <meta property="og:title" content="Matheus Varela Mendes — [ DATA OPS ]">
+  <meta property="og:description" content="Engenheiro de Analytics · Microsoft Fabric · Power BI · arquitetura de dados.">
   <meta property="og:type" content="website">
   <title>Matheus Varela Mendes — [ DATA OPS ]</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -16,8 +16,8 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="locked">
-  <!-- AUDIO GATE -->
+<body class="locked phase-gate" data-phase="GATE">
+  <!-- LAYER 1: AUDIO GATE -->
   <div class="audio-gate" id="audioGate" role="dialog" aria-modal="true" aria-labelledby="audioGateTitle" aria-describedby="audioGateDesc">
     <div class="gate-frame" aria-hidden="true">
       <span class="corner tl"></span><span class="corner tr"></span>
@@ -41,20 +41,18 @@
     </div>
   </div>
 
-  <!-- REBUILD / COLLAPSE OVERLAY -->
-  <div class="rebuild-overlay" id="rebuildOverlay" aria-hidden="true">
-    <p class="rebuild-label" id="rebuildLabel">Reconstructing...</p>
-    <pre class="rebuild-log" id="rebuildLog" aria-hidden="true"></pre>
-  </div>
+  <!-- LAYER: CHAOS / SYSTEM FAILURE (preenchida via chaos.js) -->
+  <div class="chaos-layer" id="chaosLayer" aria-hidden="true"></div>
 
-  <!-- Custom cursor -->
+  <!-- Cursor -->
   <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
   <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
 
-  <!-- Interactive spatial field -->
+  <!-- LAYER 3: SPATIAL -->
   <canvas class="field-canvas" id="fieldCanvas" aria-hidden="true"></canvas>
   <div class="grid-plane" aria-hidden="true"></div>
 
+  <!-- LAYER 2: SYSTEM CHROME -->
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="#hero" class="nav-logo" data-sound="click">[ <span id="navLogo">MV</span> ]</a>
@@ -79,7 +77,8 @@
     </div>
   </nav>
 
-  <main id="appMain">
+  <!-- LAYER 4: CONTENT -->
+  <main id="appMain" class="content-layer">
     <section id="hero" class="hero">
       <aside class="hud hud-tl" aria-hidden="true">
         <p># MODULE:// DATA_OPS</p>
@@ -103,7 +102,7 @@
       </div>
 
       <div class="signal-readout" id="signalReadout" aria-hidden="true">
-        <p>INBOUND:// SIGNAL ACQUIRED · CH-03 · BEACON LOCK</p>
+        <p>ARCHIVE:// NODE READY · CONTENT LAYER STABLE</p>
         <p id="signalLine">MOUSE:// X=0.000 Y=0.000 · FORCE=0.00 · NODES ACTIVE</p>
       </div>
 
@@ -177,7 +176,9 @@
   </footer>
 
   <script src="js/data.js"></script>
+  <script src="js/app-state.js"></script>
   <script src="js/audio.js"></script>
+  <script src="js/chaos.js"></script>
   <script src="js/field.js"></script>
   <script src="js/main.js"></script>
 </body>

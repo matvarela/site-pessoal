@@ -1,5 +1,5 @@
 // ============================================================
-//  main.js — Gate de áudio, rebuild/colapso, render data-driven
+//  main.js — 4 camadas: Gate → Chaos → Chrome/Spatial → Content
 // ============================================================
 
 const d = profileData;
@@ -17,36 +17,55 @@ function isoStamp() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
-// -- Audio gate --
+let rebuildBusy = false;
+
+// -- Passo 1: Gate → Chaos → Stable --
 function initAudioGate() {
   const gate = $("#audioGate");
-  let completed = false;
-  try { completed = localStorage.getItem("mv-audio-gate-complete") === "1"; } catch (_) {}
+  AppState.set("GATE");
 
-  const enter = (withSound) => {
+  const enter = async (withSound) => {
     Sound.setEnabled(withSound);
-    $("#hudAudio").textContent = withSound ? "ON" : "OFF";
-    gate.classList.add("exit");
-    document.body.classList.remove("locked");
-    setTimeout(() => {
-      gate.remove();
-      Sound.boot();
-      document.body.classList.add("interface-ready");
-    }, 700);
-  };
+    const audioHud = $("#hudAudio");
+    if (audioHud) audioHud.textContent = withSound ? "ON" : "OFF";
 
-  if (completed) {
-    let enabled = false;
-    try { enabled = localStorage.getItem("mv-sound-enabled") === "1"; } catch (_) {}
-    // still show gate every session for the ritual — user asked for this interaction
-    // Comment: keep gate always for first paint of each load (more faithful to reference)
-  }
+    gate.classList.add("exit");
+    Sound.boot();
+
+    await new Promise((r) => setTimeout(r, 450));
+    gate.remove();
+
+    // Intro System Failure (3.5–4s) → estabiliza Content Layer
+    await Chaos.run({ duration: 3800 });
+
+    document.body.classList.add("interface-ready");
+    window.scrollTo({ top: 0, behavior: "auto" });
+    initReveal();
+  };
 
   $("#audioOn").addEventListener("click", () => enter(true));
   $("#audioOff").addEventListener("click", () => enter(false));
 }
 
-// -- Cursor --
+// -- Passo 3: [REBUILD] reengatilha o caos e reseta origem --
+function initRebuild() {
+  const btn = $("#rebuildBtn");
+  btn.addEventListener("click", async () => {
+    if (rebuildBusy || AppState.get() === "CHAOS") return;
+    rebuildBusy = true;
+    btn.disabled = true;
+
+    await Chaos.run({ duration: 3200 });
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    $$(".reveal").forEach((n) => n.classList.remove("visible"));
+    initReveal();
+
+    btn.disabled = false;
+    rebuildBusy = false;
+  });
+}
+
 function initCursor() {
   const ring = $("#cursorRing");
   const dot = $("#cursorDot");
@@ -54,7 +73,6 @@ function initCursor() {
     document.body.classList.add("no-cursor");
     return;
   }
-
   let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
   const tick = () => {
     x += (tx - x) * 0.2;
@@ -68,79 +86,15 @@ function initCursor() {
     ring.classList.add("active");
     dot.classList.add("active");
   }, { passive: true });
-
   document.addEventListener("pointerover", (e) => {
-    if (e.target.closest("a, button, .contact-card, .skill-tag, .cert-badge")) {
-      ring.classList.add("hover");
-    }
+    if (e.target.closest("a, button, .contact-card, .skill-tag, .cert-badge")) ring.classList.add("hover");
   });
   document.addEventListener("pointerout", (e) => {
-    if (e.target.closest("a, button, .contact-card, .skill-tag, .cert-badge")) {
-      ring.classList.remove("hover");
-    }
+    if (e.target.closest("a, button, .contact-card, .skill-tag, .cert-badge")) ring.classList.remove("hover");
   });
   requestAnimationFrame(tick);
 }
 
-// -- Rebuild / collapse --
-function initRebuild() {
-  const btn = $("#rebuildBtn");
-  const overlay = $("#rebuildOverlay");
-  const label = $("#rebuildLabel");
-  const log = $("#rebuildLog");
-  const main = $("#appMain");
-  let busy = false;
-
-  const panicLines = [
-    "KERNEL PANIC AT VECTOR 0x00A31F // RETRY COUNT EXCEEDED",
-    "RECONSTRUCT TIMELINE ... ORIGIN GATE UNSTABLE ... CAUTION",
-    "CHRONO_DAEMON STACK TRACE 0x7FF · FRAME COLLAPSE",
-    "NODE:// DATA_OPS · FLUSH BUFFERS · RESET SCROLL ORIGIN",
-    "SYSTEM REBUILD · TIMELINE RETURNS TO TOP"
-  ];
-
-  btn.addEventListener("click", async () => {
-    if (busy) return;
-    busy = true;
-    Sound.rebuild();
-    Field.collapseBurst();
-
-    document.body.classList.add("collapsing");
-    main.classList.add("collapse");
-    overlay.classList.add("active");
-    overlay.setAttribute("aria-hidden", "false");
-    label.textContent = "Reconstructing...";
-    log.textContent = "";
-
-    for (let i = 0; i < panicLines.length; i++) {
-      await new Promise((r) => setTimeout(r, 220));
-      log.textContent += panicLines[i] + "\n";
-    }
-
-    await new Promise((r) => setTimeout(r, 500));
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
-
-    // rebuild entrance
-    label.textContent = "ORIGIN GATE LOCKED";
-    await new Promise((r) => setTimeout(r, 450));
-
-    overlay.classList.add("exit");
-    main.classList.remove("collapse");
-    document.body.classList.remove("collapsing");
-
-    await new Promise((r) => setTimeout(r, 700));
-    overlay.classList.remove("active", "exit");
-    overlay.setAttribute("aria-hidden", "true");
-    log.textContent = "";
-
-    // re-trigger reveals
-    $$(".reveal").forEach((n) => n.classList.remove("visible"));
-    initReveal();
-    busy = false;
-  });
-}
-
-// -- Content renderers --
 function renderHero() {
   $("#navLogo").textContent = d.shortName || "MV";
   $("#heroSystem").textContent = `[ ${d.systemId} : ${d.version} ]`;
@@ -151,7 +105,6 @@ function renderHero() {
   $("#hudVersion").textContent = d.version;
   $("#hudStamp").textContent = isoStamp();
   $("#hudPid").textContent = "2207";
-
   $("#heroActions").innerHTML = `
     <a href="${d.linkedinUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" data-sound="click">LinkedIn</a>
     <a href="#contact" class="btn btn-ghost" data-sound="click">Contato</a>
@@ -307,10 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initAudioGate();
   Sound.bindUi();
   Field.start();
-  requestAnimationFrame(() => initReveal());
 
-  // live clock in HUD
   setInterval(() => {
+    if (AppState.get() !== "STABLE") return;
     const stamp = $("#hudStamp");
     if (stamp) stamp.textContent = isoStamp();
   }, 1000);

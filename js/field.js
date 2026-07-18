@@ -1,5 +1,5 @@
 // ============================================================
-//  field.js — Campo espacial interativo (mouse-driven)
+//  field.js — Campo espacial B&W (mouse-driven), pós-estabilização
 // ============================================================
 
 const Field = (() => {
@@ -10,7 +10,7 @@ const Field = (() => {
   const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function seed() {
-    const count = Math.min(90, Math.floor((window.innerWidth * window.innerHeight) / 18000));
+    const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 20000));
     nodes = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -18,7 +18,7 @@ const Field = (() => {
       oy: 0,
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
-      r: Math.random() * 1.8 + 0.5
+      r: Math.random() * 1.6 + 0.6
     }));
     nodes.forEach((n) => { n.ox = n.x; n.oy = n.y; });
   }
@@ -39,10 +39,13 @@ const Field = (() => {
   function draw() {
     if (!ctx) return;
     ctx.clearRect(0, 0, w, h);
-
     const cx = mx * w;
     const cy = my * h;
     const radius = 180 + force * 220;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1;
 
     for (const n of nodes) {
       if (!reduce()) {
@@ -54,7 +57,6 @@ const Field = (() => {
           n.vx += (dx / dist) * push * 0.08;
           n.vy += (dy / dist) * push * 0.08;
         }
-        // soft return to origin drift
         n.vx += (n.ox - n.x) * 0.002;
         n.vy += (n.oy - n.y) * 0.002;
         n.vx *= 0.92;
@@ -64,22 +66,17 @@ const Field = (() => {
         if (n.x < 0 || n.x > w) n.vx *= -1;
         if (n.y < 0 || n.y > h) n.vy *= -1;
       }
-
       ctx.beginPath();
-      ctx.fillStyle = `rgba(255,255,255,${0.35 + Math.min(force, 1) * 0.35})`;
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // connections
-    ctx.lineWidth = 1;
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (dist < 120) {
-          const alpha = (1 - dist / 120) * (0.12 + force * 0.25);
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        // sparse links only — avoid "gray" denseness
+        if (dist < 100 && ((i + j) % 3 === 0)) {
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -88,15 +85,9 @@ const Field = (() => {
       }
     }
 
-    // mouse ring
     if (!reduce()) {
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(255,255,255,${0.15 + force * 0.35})`;
       ctx.arc(cx, cy, 28 + force * 40, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.strokeStyle = `rgba(255,255,255,${0.05 + force * 0.12})`;
-      ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
       ctx.stroke();
     }
 
@@ -106,11 +97,8 @@ const Field = (() => {
   function onPointer(e) {
     const x = e.clientX / w;
     const y = e.clientY / h;
-    const dx = x - mx;
-    const dy = y - my;
-    force = Math.min(1.4, Math.hypot(dx, dy) * 18);
-    mx = x;
-    my = y;
+    force = Math.min(1.4, Math.hypot(x - mx, y - my) * 18);
+    mx = x; my = y;
     const readout = document.getElementById("signalLine");
     if (readout) {
       readout.textContent =
@@ -134,7 +122,6 @@ const Field = (() => {
   }
 
   function collapseBurst() {
-    // fling nodes outward during rebuild
     for (const n of nodes) {
       n.vx += (Math.random() - 0.5) * 28;
       n.vy += (Math.random() - 0.5) * 28;
@@ -142,7 +129,5 @@ const Field = (() => {
     force = 1.4;
   }
 
-  function getForce() { return force; }
-
-  return { start, collapseBurst, getForce };
+  return { start, collapseBurst };
 })();
