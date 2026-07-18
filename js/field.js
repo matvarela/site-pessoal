@@ -10,7 +10,7 @@ const Field = (() => {
   const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function seed() {
-    const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 20000));
+    const count = Math.min(96, Math.max(36, Math.floor((window.innerWidth * window.innerHeight) / 16000)));
     nodes = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -18,7 +18,7 @@ const Field = (() => {
       oy: 0,
       vx: (Math.random() - 0.5) * 0.35,
       vy: (Math.random() - 0.5) * 0.35,
-      r: Math.random() * 1.6 + 0.6
+      r: Math.random() * 2.2 + 1.1
     }));
     nodes.forEach((n) => { n.ox = n.x; n.oy = n.y; });
   }
@@ -71,18 +71,30 @@ const Field = (() => {
       ctx.fill();
     }
 
-    // Keep spatial layer subtle: points only (no rings over the CTA).
+    // Links between nearby nodes — kept sparse so the hero stays readable.
+    ctx.globalAlpha = 0.35;
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (dist < 90 && ((i * j) % 5 === 0)) {
+        if (dist < 110 && ((i + j) % 4 === 0)) {
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
           ctx.stroke();
         }
       }
+    }
+    ctx.globalAlpha = 1;
+
+    // Soft focus ring follows the pointer (right half of hero stays the visual stage).
+    if (force > 0.02) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 46 + force * 28, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     if (running) raf = requestAnimationFrame(draw);

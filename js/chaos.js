@@ -161,12 +161,12 @@ const Chaos = (() => {
 
       scrambleHud();
 
-      // scanline flash bursts
-      for (let i = 0; i < 5; i++) {
+      // Brief invert flashes — keep short so the page never reads as a white blank.
+      for (let i = 0; i < 3; i++) {
         timers.push(setTimeout(() => {
-          root.classList.toggle("flash");
-          setTimeout(() => root.classList.remove("flash"), 80);
-        }, 400 + i * 500));
+          root.classList.add("flash");
+          setTimeout(() => root.classList.remove("flash"), 45);
+        }, 500 + i * 700));
       }
 
       timers.push(setTimeout(() => {

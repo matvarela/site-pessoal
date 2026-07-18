@@ -35,8 +35,8 @@ function initAudioGate() {
     await new Promise((r) => setTimeout(r, 450));
     gate.remove();
 
-    // Intro System Failure (3.5–4s) → estabiliza Content Layer
-    await Chaos.run({ duration: 2800 });
+    // Intro System Failure → estabiliza Content Layer
+    await Chaos.run({ duration: 2400 });
 
     document.body.classList.add("interface-ready");
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -55,7 +55,7 @@ function initRebuild() {
     rebuildBusy = true;
     btn.disabled = true;
 
-    await Chaos.run({ duration: 3200 });
+    await Chaos.run({ duration: 2400 });
     window.scrollTo({ top: 0, behavior: "auto" });
 
     $$(".reveal").forEach((n) => n.classList.remove("visible"));
