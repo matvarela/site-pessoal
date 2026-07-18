@@ -36,7 +36,7 @@ function initAudioGate() {
     gate.remove();
 
     // Intro System Failure (3.5–4s) → estabiliza Content Layer
-    await Chaos.run({ duration: 3800 });
+    await Chaos.run({ duration: 2800 });
 
     document.body.classList.add("interface-ready");
     window.scrollTo({ top: 0, behavior: "auto" });

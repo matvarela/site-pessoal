@@ -234,14 +234,15 @@ body.chaos-active .content-layer {
 
 .chaos-noise {
   position: absolute;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
-  opacity: 1;
+  right: 24px;
+  bottom: 24px;
+  width: 160px;
+  height: 90px;
+  border: 1px solid #fff;
   image-rendering: pixelated;
-  mix-blend-mode: difference;
   pointer-events: none;
-  z-index: 1;
+  z-index: 5;
+  opacity: 1;
 }
 
 /* Glitch text — pure B&W via clip + offset shadows in white */
@@ -325,21 +326,20 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.55;
 }
 .grid-plane {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(#fff 1px, transparent 1px),
-    linear-gradient(90deg, #fff 1px, transparent 1px);
-  background-size: 72px 72px;
+  /* sparse dots only — full white grid read as “broken UI” */
+  background-image: radial-gradient(#fff 1px, transparent 1px);
+  background-size: 48px 48px;
   opacity: 1;
-  mask-image: radial-gradient(ellipse at 65% 40%, #000 10%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at 65% 40%, #000 10%, transparent 70%);
+  mask-image: radial-gradient(ellipse at 70% 35%, #000 0%, transparent 55%);
+  -webkit-mask-image: radial-gradient(ellipse at 70% 35%, #000 0%, transparent 55%);
 }
-/* grid uses mask so lines don't become gray — they are full white where visible */
 
 /* ============================================================
    LAYOUT / NAV / CONTENT
@@ -497,6 +497,7 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
   z-index: 3;
   max-width: 720px;
   padding-top: 48px;
+  background: #000; /* keep text readable over spatial layer */
 }
 .hero-system {
   font-family: var(--font-mono);
@@ -521,9 +522,11 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
   max-width: 28ch;
 }
 .hero-tagline {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 500;
   max-width: 42ch;
   margin-bottom: 32px;
+  color: #fff;
 }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .btn {
@@ -803,6 +806,7 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
 @media (max-width: 900px) {
   body { cursor: auto; }
   .cursor-ring, .cursor-dot { display: none; }
+  .field-canvas, .grid-plane { display: none; } /* avoid clutter / “broken” overlay on mobile */
   .nav-toggle { display: flex; }
   .nav-links {
     position: fixed;
@@ -818,10 +822,15 @@ body:has(.cursor-ring.hover) .cursor-dot { background: #000; }
     gap: 22px;
     transform: translateX(100%);
     transition: transform 0.35s var(--ease);
+    z-index: 120;
   }
   .nav-links.open { transform: translateX(0); }
   .nav-links a { font-size: 0.95rem; }
-  .hud-tr, .signal-readout { display: none; }
+  .hud, .signal-readout { display: none; }
+  .hero { padding-top: calc(var(--nav-h) + 28px); }
+  .hero-stage { padding-top: 12px; max-width: none; }
+  .nav-right { gap: 8px; }
+  .rebuild-btn { font-size: 0.62rem; padding: 6px 8px; }
   .impact-grid { grid-template-columns: 1fr; }
   .timeline-item { grid-template-columns: 1fr; gap: 8px; }
   .skills-grid, .edu-grid, .contact-grid { grid-template-columns: 1fr; }

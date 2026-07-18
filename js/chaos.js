@@ -79,31 +79,29 @@ const Chaos = (() => {
   }
 
   function startNoise(root) {
+    // Small corner noise patches only — full-screen static looks like a broken page.
     canvas = document.createElement("canvas");
     canvas.className = "chaos-noise";
     root.appendChild(canvas);
     const ctx = canvas.getContext("2d");
-    const resize = () => {
-      canvas.width = Math.min(480, window.innerWidth / 3);
-      canvas.height = Math.min(270, window.innerHeight / 3);
-    };
-    resize();
+    const w = 160;
+    const h = 90;
+    canvas.width = w;
+    canvas.height = h;
     running = true;
     const draw = () => {
       if (!running) return;
-      const { width: w, height: h } = canvas;
       const img = ctx.createImageData(w, h);
       const d = img.data;
       for (let i = 0; i < d.length; i += 4) {
-        const v = Math.random() > 0.82 ? 255 : 0;
+        const v = Math.random() > 0.88 ? 255 : 0;
         d[i] = d[i + 1] = d[i + 2] = v;
-        d[i + 3] = v ? 255 : 0;
+        d[i + 3] = 255;
       }
       ctx.putImageData(img, 0, 0);
       raf = requestAnimationFrame(draw);
     };
     draw();
-    window.addEventListener("resize", resize, { once: true });
   }
 
   function scrambleHud() {
@@ -130,7 +128,7 @@ const Chaos = (() => {
    * @returns {Promise<void>}
    */
   function run(opts = {}) {
-    const duration = opts.duration ?? 3600;
+    const duration = opts.duration ?? 2800;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     return new Promise((resolve) => {

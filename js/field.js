@@ -71,24 +71,18 @@ const Field = (() => {
       ctx.fill();
     }
 
+    // Keep spatial layer subtle: points only (no rings over the CTA).
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        // sparse links only — avoid "gray" denseness
-        if (dist < 100 && ((i + j) % 3 === 0)) {
+        if (dist < 90 && ((i * j) % 5 === 0)) {
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
           ctx.stroke();
         }
       }
-    }
-
-    if (!reduce()) {
-      ctx.beginPath();
-      ctx.arc(cx, cy, 28 + force * 40, 0, Math.PI * 2);
-      ctx.stroke();
     }
 
     if (running) raf = requestAnimationFrame(draw);
