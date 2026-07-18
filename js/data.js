@@ -5,7 +5,12 @@
 
 const profileData = {
   name: "Matheus Varela Mendes",
+  shortName: "MV",
+  systemId: "MV_PORTFOLIO",
+  version: "VER_1.0.0",
   title: "Especialista em Dados | Engenheiro de Analytics",
+  headline: "Arquitetura de dados em escala corporativa.",
+  tagline: "Governança Fabric, performance Direct Lake e indicadores que chegam à diretoria.",
   location: "Rio de Janeiro, RJ",
   phone: "(21) 96544-1330",
   phoneRaw: "+5521965441330",
@@ -16,8 +21,8 @@ const profileData = {
   githubUrl: "",
 
   heroStats: [
-    { value: "220+", label: "Relatórios Corporativos" },
-    { value: "200%", label: "Redução no Tempo de Carga" },
+    { value: "220+", label: "Relatórios corporativos" },
+    { value: "200%", label: "Redução no tempo de carga" },
     { value: "5", label: "Certificações Microsoft" }
   ],
 

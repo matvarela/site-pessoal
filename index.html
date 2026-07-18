@@ -3,83 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Matheus Varela Mendes — Especialista em Dados e Engenheiro de Analytics. Portfólio profissional com experiência em Microsoft Fabric, Power BI, Python e arquitetura de dados em nuvem.">
+  <meta name="description" content="Matheus Varela Mendes — Especialista em Dados e Engenheiro de Analytics. Portfólio system-style com experiência em Microsoft Fabric, Power BI, Python e arquitetura de dados em nuvem.">
   <meta name="author" content="Matheus Varela Mendes">
   <meta name="keywords" content="Dados, Analytics, Power BI, Microsoft Fabric, Engenharia de Dados, BI, SQL, Python">
   <meta property="og:title" content="Matheus Varela Mendes — Especialista em Dados">
   <meta property="og:description" content="Engenheiro de Analytics com foco em Microsoft Fabric, Power BI e arquitetura de dados em nuvem.">
   <meta property="og:type" content="website">
-  <title>Matheus Varela Mendes — Especialista em Dados</title>
+  <title>Matheus Varela Mendes — [ SISTEMA DE DADOS ]</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Animated background -->
-  <div class="bg-gradient" aria-hidden="true"></div>
-  <div class="bg-orbs" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
+  <!-- Boot overlay -->
+  <div class="boot-overlay" id="bootOverlay" aria-hidden="true">
+    <p class="boot-label">Reconstruindo sistema…</p>
+    <p class="boot-meta" id="bootMeta">MODULE://DATA_OPS</p>
   </div>
+
+  <!-- Custom cursor -->
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+  <!-- Spatial background -->
+  <canvas class="space-canvas" id="spaceCanvas" aria-hidden="true"></canvas>
+  <div class="grid-plane" aria-hidden="true"></div>
 
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
     <div class="nav-container">
-      <a href="#hero" class="nav-logo" aria-label="Início">MV</a>
+      <a href="#hero" class="nav-logo" aria-label="Início">[ <span id="navLogo">MV</span> ]</a>
       <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#hero" aria-label="Início">Início</a></li>
-        <li><a href="#about" aria-label="Sobre">Sobre</a></li>
-        <li><a href="#experience" aria-label="Experiência">Experiência</a></li>
-        <li><a href="#skills" aria-label="Habilidades">Habilidades</a></li>
-        <li><a href="#education" aria-label="Formação">Formação</a></li>
-        <li><a href="#contact" aria-label="Contato">Contato</a></li>
+        <li><a href="#hero">// início</a></li>
+        <li><a href="#impact">// impacto</a></li>
+        <li><a href="#about">// sobre</a></li>
+        <li><a href="#experience">// trajetória</a></li>
+        <li><a href="#skills">// stack</a></li>
+        <li><a href="#education">// credenciais</a></li>
+        <li><a href="#contact">// contato</a></li>
       </ul>
     </div>
   </nav>
 
   <main>
-    <!-- Hero -->
+    <!-- Hero: one composition -->
     <section id="hero" class="hero">
-      <div class="container hero-content">
-        <p class="hero-greeting reveal" data-delay="0">Olá, eu sou</p>
-        <h1 class="hero-name reveal" data-delay="100" id="heroName"></h1>
-        <h2 class="hero-title reveal" data-delay="200">
-          <span id="typewriter"></span><span class="cursor">|</span>
-        </h2>
-        <p class="hero-location reveal" data-delay="300">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span id="heroLocation"></span>
-        </p>
-        <div class="hero-stats reveal" data-delay="400" id="heroStats"></div>
-        <div class="hero-actions reveal" data-delay="500" id="heroActions"></div>
+      <aside class="hud hud-tl" aria-hidden="true">
+        <p id="hudModule"># MODULE:// DATA_OPS</p>
+        <p id="hudFacility">FACILITY=ANALYTICS_NODE</p>
+        <p id="hudPid">PID=2207</p>
+        <p id="hudStamp"></p>
+      </aside>
+      <aside class="hud hud-tr" aria-hidden="true">
+        <p><span class="status-dot"></span> STATUS=ONLINE</p>
+        <p id="hudLoc"></p>
+        <p id="hudVersion"></p>
+      </aside>
+
+      <div class="hero-stage">
+        <p class="hero-system" id="heroSystem"></p>
+        <h1 class="hero-name" id="heroName"></h1>
+        <p class="hero-headline" id="heroHeadline"></p>
+        <p class="hero-tagline" id="heroTagline"></p>
+        <div class="hero-actions" id="heroActions"></div>
       </div>
-      <div class="scroll-indicator" aria-hidden="true">
-        <span></span>
+
+      <div class="hero-shapes" aria-hidden="true">
+        <div class="shape shape-cube"></div>
+        <div class="shape shape-sphere"></div>
+        <div class="shape shape-pyramid"></div>
+        <div class="shape shape-stream"></div>
+      </div>
+
+      <a href="#impact" class="scroll-cue" aria-label="Rolar para impacto">
+        <span>scroll</span>
+      </a>
+    </section>
+
+    <!-- Impact metrics (after hero) -->
+    <section id="impact" class="section section-impact">
+      <div class="container">
+        <p class="section-kicker reveal">// metrics</p>
+        <h2 class="section-title reveal">Impacto mensurável</h2>
+        <div class="impact-grid" id="impactGrid"></div>
       </div>
     </section>
 
     <!-- About -->
     <section id="about" class="section">
-      <div class="container">
-        <h2 class="section-title reveal">Sobre</h2>
-        <div class="glass-card about-card reveal" data-delay="100">
-          <p id="aboutText" class="about-text"></p>
-        </div>
+      <div class="container narrow">
+        <p class="section-kicker reveal">// about</p>
+        <h2 class="section-title reveal">Sobre o operador</h2>
+        <p id="aboutText" class="about-text reveal" data-delay="80"></p>
       </div>
     </section>
 
     <!-- Experience -->
     <section id="experience" class="section">
       <div class="container">
-        <h2 class="section-title reveal">Experiência</h2>
+        <p class="section-kicker reveal">// experience</p>
+        <h2 class="section-title reveal">Trajetória</h2>
         <div class="timeline" id="timeline"></div>
       </div>
     </section>
@@ -87,7 +116,8 @@
     <!-- Skills -->
     <section id="skills" class="section">
       <div class="container">
-        <h2 class="section-title reveal">Habilidades</h2>
+        <p class="section-kicker reveal">// stack</p>
+        <h2 class="section-title reveal">Capacidades</h2>
         <div class="skills-grid" id="skillsGrid"></div>
       </div>
     </section>
@@ -95,14 +125,15 @@
     <!-- Education & Certifications -->
     <section id="education" class="section">
       <div class="container">
-        <h2 class="section-title reveal">Formação & Certificações</h2>
+        <p class="section-kicker reveal">// credentials</p>
+        <h2 class="section-title reveal">Formação & certificações</h2>
         <div class="edu-grid">
-          <div class="glass-card reveal" data-delay="0">
-            <h3 class="edu-section-title">Formação</h3>
+          <div class="panel reveal" data-delay="0">
+            <h3 class="panel-title">Formação</h3>
             <div id="educationList"></div>
           </div>
-          <div class="glass-card reveal" data-delay="100">
-            <h3 class="edu-section-title">Certificações</h3>
+          <div class="panel reveal" data-delay="80">
+            <h3 class="panel-title">Certificações</h3>
             <div class="cert-badges" id="certBadges"></div>
           </div>
         </div>
@@ -110,18 +141,20 @@
     </section>
 
     <!-- Contact -->
-    <section id="contact" class="section">
+    <section id="contact" class="section section-contact">
       <div class="container">
-        <h2 class="section-title reveal">Contato</h2>
-        <p class="section-subtitle reveal" data-delay="50">Vamos conversar sobre dados.</p>
+        <p class="section-kicker reveal">// contact</p>
+        <h2 class="section-title reveal">Abrir canal</h2>
+        <p class="section-subtitle reveal" data-delay="40">Vamos conversar sobre dados, Fabric e decisões em escala.</p>
         <div class="contact-grid" id="contactGrid"></div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="container">
-      <p>&copy; <span id="footerYear"></span> Matheus Varela Mendes. Desenvolvido com foco em dados.</p>
+    <div class="container footer-inner">
+      <p class="footer-mono" id="footerSystem"></p>
+      <p>&copy; <span id="footerYear"></span> Matheus Varela Mendes.</p>
     </div>
   </footer>
 
