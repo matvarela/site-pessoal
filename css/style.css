@@ -286,7 +286,7 @@ nav.scrolled {
   letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: calc(var(--title-hero) * 0.18);
+  margin-bottom: 20px;
   overflow: hidden;
 }
 .hero-eyebrow span { display: inline-block; transform: translateY(110%); }
