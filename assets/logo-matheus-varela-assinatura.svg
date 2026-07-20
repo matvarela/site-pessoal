@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 64" fill="none" role="img" aria-label="Matheus Varela">
+  <!-- Fundo transparente; use em fundo preto -->
+  <!-- Mark: montanhas -->
+  <path d="M0 48 L27 4 L39 22 L51 10 L72 48 Z" fill="#FFFFFF"/>
+  <!-- Divisor vertical -->
+  <rect x="92" y="16" width="1.5" height="32" fill="#FFFFFF" opacity="0.45"/>
+  <!-- Assinatura -->
+  <text
+    x="116"
+    y="40"
+    fill="#FFFFFF"
+    font-family="Montserrat, Arial, Helvetica, sans-serif"
+    font-size="18"
+    font-weight="500"
+    letter-spacing="0.28em"
+    text-transform="uppercase"
+  >MATHEUS VARELA</text>
+</svg>
