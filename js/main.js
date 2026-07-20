@@ -241,26 +241,85 @@ function initNavbar() {
   const navLinks = $('#navLinks');
   const links = navLinks.querySelectorAll('a');
   let navScrolled = false;
+  let menuScrollY = 0;
 
-  navToggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    navToggle.classList.toggle('open', isOpen);
-    navToggle.setAttribute('aria-expanded', String(isOpen));
-    navToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+  function isMenuOpen() {
+    return navLinks.classList.contains('open');
+  }
+
+  function lockBodyScroll() {
+    menuScrollY = window.scrollY || window.pageYOffset;
+    document.body.classList.add('menu-open');
+    document.body.style.top = `-${menuScrollY}px`;
+  }
+
+  function unlockBodyScroll() {
+    document.body.classList.remove('menu-open');
+    document.body.style.top = '';
+    window.scrollTo(0, menuScrollY);
+  }
+
+  function setMenuOpen(open) {
+    navLinks.classList.toggle('open', open);
+    navToggle.classList.toggle('open', open);
+    navEl.classList.toggle('menu-open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    if (open) lockBodyScroll();
+    else unlockBodyScroll();
+  }
+
+  function closeMenu() {
+    if (!isMenuOpen()) return;
+    setMenuOpen(false);
+  }
+
+  navToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setMenuOpen(!isMenuOpen());
   });
 
   links.forEach((link) => {
     link.addEventListener('click', () => {
+      /* Fecha depois do navigate suave ter a posição correta do body */
+      if (!isMenuOpen()) return;
       navLinks.classList.remove('open');
       navToggle.classList.remove('open');
+      navEl.classList.remove('menu-open');
       navToggle.setAttribute('aria-expanded', 'false');
       navToggle.setAttribute('aria-label', 'Abrir menu');
+      document.body.classList.remove('menu-open');
+      document.body.style.top = '';
+      /* Mantém a posição visual atual; o handler de âncora faz o scroll */
+      window.scrollTo(0, menuScrollY);
     });
   });
+
+  /* Fecha ao tocar no fundo do overlay (fora dos links) */
+  navLinks.addEventListener('click', (e) => {
+    if (e.target === navLinks) closeMenu();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  /* Impede scroll por gesto enquanto o menu está aberto (iOS) */
+  document.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!isMenuOpen()) return;
+      if (navToggle.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('.nav-links a')) return;
+      e.preventDefault();
+    },
+    { passive: false }
+  );
 
   window.addEventListener(
     'scroll',
     () => {
+      if (isMenuOpen()) return;
       const should = window.scrollY > 60;
       if (should === navScrolled) return;
       navScrolled = should;

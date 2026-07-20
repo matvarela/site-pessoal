@@ -274,16 +274,29 @@ nav.scrolled {
   min-height: 44px;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 220;
 }
 .nav-toggle span {
   width: 22px;
   height: 1px;
   background: var(--fg);
   transition: transform 0.3s ease, opacity 0.3s ease;
+  display: block;
 }
 .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
 .nav-toggle.open span:nth-child(2) { opacity: 0; }
 .nav-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* Trava o scroll do site enquanto o menu mobile está aberto */
+body.menu-open {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
 
 /* ============================================================
    HERO
@@ -954,16 +967,51 @@ nav.scrolled {
     display: none;
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
     background: var(--bg);
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 32px;
-    z-index: 150;
+    z-index: 180;
+    margin: 0;
+    padding: max(80px, env(safe-area-inset-top)) 24px 48px;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+    -webkit-overflow-scrolling: auto;
   }
   .nav-links.open { display: flex; }
-  .nav-links a { font-size: 18px; letter-spacing: 0.14em; }
+  .nav-links a {
+    font-size: 18px;
+    letter-spacing: 0.14em;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+  }
   .nav-links a::after { bottom: 4px; }
+
+  /* Controles da nav ficam acima do overlay para fechar (X) */
+  nav.menu-open {
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    width: 100%;
+    max-width: none;
+    padding: 16px var(--pad-x);
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0;
+  }
+  nav.menu-open .nav-logo,
+  nav.menu-open .theme-btn {
+    position: relative;
+    z-index: 220;
+  }
 
   #hero {
     padding-bottom: max(40px, calc(40px + env(safe-area-inset-bottom)));
