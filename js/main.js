@@ -655,6 +655,23 @@ function runPreloader() {
     gsap.set(percentEl, { opacity: 0, visibility: 'hidden', display: 'none' });
   }
 
+  function revealHero(skipNavLogo) {
+    /* Libera a página e dispara a hero no mesmo instante — sem pausa em preto */
+    document.body.classList.remove('is-loading');
+    if (navMark) {
+      navMark.style.opacity = '1';
+      navMark.style.visibility = 'visible';
+    }
+    if (logoEl) logoEl.style.opacity = '0';
+    heroIn({ skipNavLogo: Boolean(skipNavLogo) });
+  }
+
+  function dismissPreloader() {
+    if (!preloader) return;
+    preloader.style.display = 'none';
+    preloader.setAttribute('aria-hidden', 'true');
+  }
+
   function flyLogoToNav(done) {
     if (!logoEl || !navMark || typeof gsap === 'undefined') {
       done(false);
@@ -681,7 +698,6 @@ function runPreloader() {
       filter: isLight ? 'invert(1)' : 'none'
     });
 
-    /* Mantém o fundo preto opaco durante o voo — evita a hero aparecer cedo */
     gsap.set(preloader, { backgroundColor: '#000000' });
 
     gsap.to(logoEl, {
@@ -703,18 +719,15 @@ function runPreloader() {
     }
 
     flyLogoToNav((ok) => {
-      if (ok && navMark) {
-        navMark.style.opacity = '1';
-        navMark.style.visibility = 'visible';
-        if (logoEl) logoEl.style.opacity = '0';
-      }
+      /* Ao pousar a logo: hero entra junto com o fade do preto */
+      revealHero(ok);
 
-      /* Só depois do pouso: dissolve o loader e entra a hero uma vez */
+      gsap.set(preloader, { pointerEvents: 'none' });
       gsap.to(preloader, {
         opacity: 0,
-        duration: 0.45,
-        ease: 'power2.inOut',
-        onComplete: () => finishPreloader(preloader, { skipNavLogo: ok })
+        duration: 0.55,
+        ease: 'power2.out',
+        onComplete: dismissPreloader
       });
     });
   }
