@@ -147,7 +147,7 @@ nav.scrolled {
   min-height: 44px;
 }
 .nav-logo-mark {
-  width: 28px;
+  width: 30px;
   height: 19px;
   color: var(--fg);
   flex-shrink: 0;
