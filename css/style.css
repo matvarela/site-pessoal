@@ -90,78 +90,47 @@ body::after {
 }
 
 /* ============================================================
-   PRELOADER — eleven-eleven style (goo mask + liquid wipe)
+   PRELOADER — logo + percentual
    ============================================================ */
 #preloader {
   position: fixed;
   inset: 0;
   z-index: 9000;
-  pointer-events: all;
-}
-.pl-stage {
-  position: absolute;
-  inset: 0;
   background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  pointer-events: all;
+}
+.pl-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
 }
 .pl-logo {
-  position: relative;
-  width: min(62vw, 520px);
-  aspect-ratio: 1344 / 768;
-  will-change: transform, width, height, top, left;
-  z-index: 2;
-}
-.pl-logo.is-flying {
-  position: fixed;
-  margin: 0;
-}
-.pl-logo-svg {
   display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  width: min(42vw, 140px);
+  height: auto;
+  aspect-ratio: 7 / 4;
+  object-fit: contain;
+  opacity: 0;
+  transform: translateY(8px);
 }
-.pl-blob-dot {
-  transform-origin: center;
-}
-
-/* Wipe líquido full-screen (como LoaderBlob do EE) */
-.pl-wipe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 5;
-  pointer-events: none;
-  display: none;
-}
-.pl-wipe.is-active {
-  display: block;
-  pointer-events: auto;
-}
-.pl-wipe-path {
-  fill: url(#plWipeGrad);
+.pl-percent {
+  font-family: var(--font-en);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.2em;
+  opacity: 0;
 }
 
 body.is-loading {
   overflow: hidden;
-}
-body.is-loading #nav,
-body.is-loading #mobileNav {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-body.is-loading .nav-logo-mark {
-  opacity: 0;
-  visibility: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pl-blob-dot { animation: none !important; }
 }
 
 /* ============================================================
@@ -1225,7 +1194,6 @@ body.menu-open {
   .marquee-track { animation: none; }
   .sh-line::after { animation: none; }
   .pill-dot { animation: none; }
-  .pl-blob-dot { animation: none !important; }
   .hero-title .tl span,
   .hero-eyebrow span,
   .s-title .tl span { transform: none; }

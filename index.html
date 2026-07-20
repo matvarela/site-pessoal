@@ -22,55 +22,16 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
-  <link rel="stylesheet" href="css/style.css?v=20260720-ee2">
+  <link rel="stylesheet" href="css/style.css?v=20260720-loader">
 </head>
 <body class="is-loading">
 
-  <!-- Preloader — efeito tipo eleven-eleven: goo na máscara da logo + wipe líquido -->
+  <!-- Preloader — logo + percentual -->
   <div id="preloader" aria-hidden="true" role="status" aria-label="Carregando">
-    <div class="pl-stage" id="plStage">
-      <div class="pl-logo" id="plLogo">
-        <svg class="pl-logo-svg" viewBox="0 0 1344 768" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <filter id="plGoo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="24" result="blur"/>
-              <feColorMatrix in="blur" mode="matrix"
-                values="1 0 0 0 0
-                        0 1 0 0 0
-                        0 0 1 0 0
-                        0 0 0 32 -14" result="goo"/>
-            </filter>
-            <clipPath id="plLogoClip" clipPathUnits="userSpaceOnUse">
-              <path d="M170.2 582 C172.5 579.3 229.8 521.1 297.5 452.7 C411.3 337.7 542.4 204.9 571.9 174.7 C578.8 167.7 584.7 162 585.1 162.2 C585.5 162.3 592 169 599.6 177 C607.1 184.9 623 201.6 634.9 214 C646.7 226.3 674.4 255.4 696.4 278.5 C718.4 301.6 742.5 326.8 749.9 334.5 C757.4 342.2 773 358.4 784.7 370.6 L806 392.8 828.8 369.6 C841.3 356.9 864.3 333.3 879.9 317.2 C895.5 301.1 908.6 288 909 288 C909.5 288 910.9 289.2 912.1 290.8 C913.4 292.4 926.6 306.4 941.5 322 C956.3 337.5 982.4 365 999.5 382.9 C1016.5 400.9 1043.5 429.3 1059.5 446 C1090.5 478.6 1171 563.5 1184.8 578.1 L1193.1 587 1038.3 586.9 L883.5 586.9 827 529.7 C795.9 498.2 750.9 452.6 726.8 428.3 L683.2 384.2 653.8 413.8 C580.1 488 484.4 585.2 484.2 586.1 C484.1 586.6 418.2 587 325 587 L166 587 170.2 582"/>
-            </clipPath>
-          </defs>
-          <g clip-path="url(#plLogoClip)">
-            <rect class="pl-logo-bg" x="0" y="0" width="1344" height="768" fill="#141414"/>
-            <g class="pl-goo" filter="url(#plGoo)">
-              <circle class="pl-blob-dot" cx="300" cy="500" r="260" fill="#a855f7"/>
-              <circle class="pl-blob-dot" cx="660" cy="400" r="290" fill="#22d3ee"/>
-              <circle class="pl-blob-dot" cx="1000" cy="480" r="250" fill="#f472b6"/>
-              <circle class="pl-blob-dot" cx="500" cy="280" r="220" fill="#818cf8"/>
-              <circle class="pl-blob-dot" cx="880" cy="260" r="210" fill="#2dd4bf"/>
-              <circle class="pl-blob-dot" cx="420" cy="620" r="200" fill="#e879f9"/>
-              <circle class="pl-blob-dot" cx="760" cy="560" r="230" fill="#c084fc"/>
-            </g>
-          </g>
-        </svg>
-      </div>
+    <div class="pl-inner">
+      <img class="pl-logo" src="assets/logo-mark.svg" alt="" width="112" height="64" decoding="async">
+      <p class="pl-percent" id="plPercent" aria-live="polite">0%</p>
     </div>
-
-    <!-- Wipe líquido (LoaderBlob do eleven-eleven) -->
-    <svg class="pl-wipe" id="plWipe" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="plWipeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop id="plWipeStop1" offset="0.3" stop-color="#a855f7"/>
-          <stop id="plWipeStop2" offset="1" stop-color="#22d3ee"/>
-        </linearGradient>
-      </defs>
-      <path id="plWipePath" class="pl-wipe-path" fill="url(#plWipeGrad)"
-        d="M 0 100 C 16.67 100 16.67 100 33.33 100 C 50 100 50 100 66.67 100 C 83.33 100 83.33 100 100 100 V 100 H 0"/>
-    </svg>
   </div>
 
   <!-- Nav — logo assinatura (ícone | Matheus Varela) no canto superior esquerdo -->
@@ -248,7 +209,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="js/data.js?v=20260720-ee2"></script>
-  <script src="js/main.js?v=20260720-ee2"></script>
+  <script src="js/data.js?v=20260720-loader"></script>
+  <script src="js/main.js?v=20260720-loader"></script>
 </body>
 </html>
