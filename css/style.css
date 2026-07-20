@@ -90,7 +90,7 @@ body::after {
 }
 
 /* ============================================================
-   PRELOADER — logo máscara + gradiente fluido → nav (FLIP)
+   PRELOADER — eleven-eleven style (goo mask + liquid wipe)
    ============================================================ */
 #preloader {
   position: fixed;
@@ -98,73 +98,54 @@ body::after {
   z-index: 9000;
   pointer-events: all;
 }
-.pl-curtain {
+.pl-stage {
   position: absolute;
   inset: 0;
   background: #000;
-  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
 }
 .pl-logo {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  width: min(72vw, 420px);
-  aspect-ratio: 1344 / 768;
-  transform: translate(-50%, -50%);
-  z-index: 9001;
-  will-change: transform, top, left, width, height;
-  pointer-events: none;
-}
-.pl-logo-mask {
   position: relative;
+  width: min(62vw, 520px);
+  aspect-ratio: 1344 / 768;
+  will-change: transform, width, height, top, left;
+  z-index: 2;
+}
+.pl-logo.is-flying {
+  position: fixed;
+  margin: 0;
+}
+.pl-logo-svg {
+  display: block;
   width: 100%;
   height: 100%;
-  -webkit-mask-image: url('../assets/logo-mark.svg');
-  mask-image: url('../assets/logo-mark.svg');
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-mode: luminance;
-  mask-mode: luminance;
+  overflow: visible;
 }
-.pl-logo-base {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.14);
-}
-.pl-logo-fluid {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  clip-path: inset(100% 0 0 0);
-  will-change: clip-path;
-}
-.pl-logo-orb {
-  position: absolute;
-  inset: -60%;
-  width: 220%;
-  height: 220%;
-  background:
-    radial-gradient(circle at 22% 28%, #c084fc 0%, transparent 42%),
-    radial-gradient(circle at 78% 18%, #22d3ee 0%, transparent 40%),
-    radial-gradient(circle at 48% 78%, #f472b6 0%, transparent 45%),
-    radial-gradient(circle at 70% 55%, #818cf8 0%, transparent 38%),
-    radial-gradient(circle at 30% 60%, #2dd4bf 0%, transparent 36%),
-    linear-gradient(135deg, #4c1d95 0%, #0e7490 45%, #9d174d 100%);
-  background-size: 100% 100%;
-  animation: plOrb 3.2s ease-in-out infinite alternate;
-  filter: saturate(1.35) brightness(1.15);
-}
-@keyframes plOrb {
-  0% { transform: translate(-6%, -4%) rotate(0deg) scale(1); }
-  50% { transform: translate(4%, 6%) rotate(12deg) scale(1.08); }
-  100% { transform: translate(8%, -2%) rotate(-8deg) scale(1.04); }
+.pl-blob-dot {
+  transform-origin: center;
 }
 
-/* Durante o preloader: nav oculta; a marca voa via FLIP compartilhado */
+/* Wipe líquido full-screen (como LoaderBlob do EE) */
+.pl-wipe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  display: none;
+}
+.pl-wipe.is-active {
+  display: block;
+  pointer-events: auto;
+}
+.pl-wipe-path {
+  fill: url(#plWipeGrad);
+}
+
 body.is-loading {
   overflow: hidden;
 }
@@ -179,15 +160,8 @@ body.is-loading .nav-logo-mark {
   visibility: hidden;
 }
 
-.pl-logo.is-solid .pl-logo-base {
-  background: #ffffff;
-}
-.pl-logo.is-solid .pl-logo-fluid {
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .pl-logo-orb { animation: none; }
+  .pl-blob-dot { animation: none !important; }
 }
 
 /* ============================================================
@@ -1251,7 +1225,7 @@ body.menu-open {
   .marquee-track { animation: none; }
   .sh-line::after { animation: none; }
   .pill-dot { animation: none; }
-  .pl-logo-orb { animation: none; }
+  .pl-blob-dot { animation: none !important; }
   .hero-title .tl span,
   .hero-eyebrow span,
   .s-title .tl span { transform: none; }

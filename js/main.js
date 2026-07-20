@@ -607,18 +607,170 @@ function finishPreloader(preloader, skipNavLogo) {
   heroIn({ skipNavLogo: Boolean(skipNavLogo) });
 }
 
+/* ---- Preloader estilo eleven-eleven ---- */
+function easeInOutQuart(t) {
+  return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+}
+
+function createLiquidWipe(pathEl, opts) {
+  const speed = opts.speed || 1100;
+  const numInPoints = opts.numInPoints || 4;
+  const numOutPoints = opts.numOutPoints || 6;
+  const delayPointsMaxIn = opts.delayPointsMaxIn || 250;
+  const delayPointsMaxOut = opts.delayPointsMaxOut || 300;
+  const delayPerPath = opts.delayPerPath || 100;
+
+  let isCovering = false;
+  let delays = [];
+  let numPoints = numInPoints;
+  let delayMax = delayPointsMaxIn;
+  let startTime = 0;
+  let halfwayFired = false;
+  let ticking = false;
+
+  function buildPath(elapsed, covering) {
+    /* covering=true → wipe IN (preenche de cima p/ baixo), como EE o.value=true */
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+      points[i] = easeInOutQuart(Math.min(Math.max(elapsed - delays[i], 0) / speed, 1)) * 100;
+    }
+    let d = covering ? `M 0 0 V ${points[0]} ` : `M 0 ${points[0]} `;
+    for (let i = 0; i < numPoints - 1; i++) {
+      const x = ((i + 1) / (numPoints - 1)) * 100;
+      const cx = x - (1 / (numPoints - 1) * 100) / 2;
+      d += `C ${cx} ${points[i]} ${cx} ${points[i + 1]} ${x} ${points[i + 1]} `;
+    }
+    d += covering ? 'V 0 H 0' : 'V 100 H 0';
+    return d;
+  }
+
+  function arm(covering) {
+    isCovering = covering;
+    numPoints = covering ? numInPoints : numOutPoints;
+    delayMax = covering ? delayPointsMaxIn : delayPointsMaxOut;
+    const phase = Math.random() * Math.PI * 2;
+    delays = [];
+    for (let i = 0; i < numPoints; i++) {
+      const angle = (i / Math.max(numPoints - 1, 1)) * Math.PI * 2;
+      delays[i] = ((Math.sin(angle + phase) + 1) / 2) * delayMax;
+    }
+    startTime = Date.now();
+    halfwayFired = false;
+  }
+
+  function tick() {
+    if (!ticking) return;
+    const elapsed = Date.now() - (startTime + delayPerPath);
+    pathEl.setAttribute('d', buildPath(Math.max(elapsed, 0), isCovering));
+
+    if (elapsed > speed / 2 && isCovering && !halfwayFired) {
+      halfwayFired = true;
+      if (opts.onHalfway) opts.onHalfway();
+    }
+
+    if (elapsed > speed + delayPerPath + delayMax) {
+      ticking = false;
+      if (typeof gsap !== 'undefined') gsap.ticker.remove(tick);
+      if (isCovering) {
+        if (opts.onInComplete) opts.onInComplete();
+      } else if (opts.onOutComplete) {
+        opts.onOutComplete();
+      }
+    }
+  }
+
+  return {
+    coverIn() {
+      arm(true);
+      ticking = true;
+      if (typeof gsap !== 'undefined') gsap.ticker.add(tick);
+      else {
+        const loop = () => {
+          tick();
+          if (ticking) requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+      }
+    },
+    coverOut() {
+      arm(false);
+      ticking = true;
+      if (typeof gsap !== 'undefined') gsap.ticker.add(tick);
+      else {
+        const loop = () => {
+          tick();
+          if (ticking) requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+      }
+    }
+  };
+}
+
+function animateGooBlobs() {
+  const dots = document.querySelectorAll('.pl-blob-dot');
+  if (!dots.length || typeof gsap === 'undefined') return null;
+
+  const tweens = [];
+  dots.forEach((dot, i) => {
+    const cx = parseFloat(dot.getAttribute('cx'));
+    const cy = parseFloat(dot.getAttribute('cy'));
+    const r = parseFloat(dot.getAttribute('r'));
+
+    tweens.push(
+      gsap.to(dot, {
+        attr: {
+          cx: cx + gsap.utils.random(-260, 260),
+          cy: cy + gsap.utils.random(-200, 200)
+        },
+        duration: gsap.utils.random(1.8, 3.2),
+        ease: 'sine.inOut',
+        yoyo: true,
+        repeat: -1,
+        delay: i * 0.05
+      })
+    );
+    tweens.push(
+      gsap.to(dot, {
+        attr: { r: Math.max(90, r + gsap.utils.random(-55, 70)) },
+        duration: gsap.utils.random(1.5, 2.6),
+        ease: 'sine.inOut',
+        yoyo: true,
+        repeat: -1,
+        delay: i * 0.1
+      })
+    );
+  });
+  return () => tweens.forEach((t) => t.kill());
+}
+
+function setWipeGradient() {
+  const palettes = [
+    ['#a855f7', '#22d3ee'],
+    ['#f472b6', '#818cf8'],
+    ['#22d3ee', '#f472b6'],
+    ['#2dd4bf', '#a855f7']
+  ];
+  const pair = palettes[Math.floor(Math.random() * palettes.length)];
+  const s1 = document.getElementById('plWipeStop1');
+  const s2 = document.getElementById('plWipeStop2');
+  if (s1) s1.setAttribute('stop-color', pair[0]);
+  if (s2) s2.setAttribute('stop-color', pair[1]);
+}
+
 function runPreloader() {
   const preloader = $('#preloader');
-  const curtain = $('#plCurtain');
+  const stage = $('#plStage');
   const logo = $('#plLogo');
-  const fluid = $('#plFluid');
+  const wipeSvg = $('#plWipe');
+  const wipePath = $('#plWipePath');
   const navMark = document.querySelector('.nav-logo-mark');
 
   const forcePreloader = new URLSearchParams(window.location.search).has('preloader');
   const skipAnim =
     typeof gsap === 'undefined' ||
     window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    (!forcePreloader && sessionStorage.getItem('mv_preloader_v3') === '1');
+    (!forcePreloader && sessionStorage.getItem('mv_preloader_v4') === '1');
 
   if (!preloader) {
     document.body.classList.remove('is-loading');
@@ -632,106 +784,94 @@ function runPreloader() {
   }
 
   if (!forcePreloader) {
-    sessionStorage.setItem('mv_preloader_v3', '1');
+    sessionStorage.setItem('mv_preloader_v4', '1');
   }
 
-  const FILL_MS = 2500;
+  const stopGoo = animateGooBlobs();
+  setWipeGradient();
 
-  /* 1) Preenchimento do gradiente dentro da máscara da logo */
-  gsap.fromTo(
-    fluid,
-    { clipPath: 'inset(100% 0 0 0)' },
-    {
-      clipPath: 'inset(0% 0 0 0)',
-      duration: FILL_MS / 1000,
-      ease: 'power2.inOut'
-    }
-  );
+  const GOO_MS = 2400;
 
-  /* 2) Após o fill: FLIP da logo centro → marca da nav + cortina some */
   window.setTimeout(() => {
-    if (!logo || !navMark || !curtain) {
-      finishPreloader(preloader, false);
-      return;
-    }
-
-    const start = logo.getBoundingClientRect();
-    const end = navMark.getBoundingClientRect();
-
-    /* Congela a logo em top/left absolutos (sem translate -50%) para o FLIP */
-    gsap.set(logo, {
-      transform: 'none',
-      top: start.top,
-      left: start.left,
-      width: start.width,
-      height: start.height,
-      x: 0,
-      y: 0
-    });
-
-    const tl = gsap.timeline({
-      defaults: { ease: 'power4.inOut' },
-      onComplete: () => {
-        navMark.style.opacity = '1';
-        navMark.style.visibility = 'visible';
-        if (logo) logo.style.opacity = '0';
-        finishPreloader(preloader, true);
+    /* 1) Logo solidifica em branco e voa para a nav (shared layout) */
+    const flyPromise = new Promise((resolve) => {
+      if (!logo || !navMark) {
+        resolve(false);
+        return;
       }
+
+      const start = logo.getBoundingClientRect();
+      const end = navMark.getBoundingClientRect();
+
+      logo.classList.add('is-flying');
+      gsap.set(logo, {
+        top: start.top,
+        left: start.left,
+        width: start.width,
+        height: start.height,
+        x: 0,
+        y: 0,
+        position: 'fixed',
+        zIndex: 9010
+      });
+
+      const tl = gsap.timeline({
+        onComplete: () => resolve(true)
+      });
+
+      /* esconde goo, preenche de branco */
+      tl.to('.pl-goo', { opacity: 0, duration: 0.35, ease: 'power2.out' }, 0);
+      tl.to('.pl-logo-bg', { attr: { fill: '#ffffff' }, duration: 0.45, ease: 'power2.out' }, 0.05);
+      tl.to(
+        logo,
+        {
+          top: end.top,
+          left: end.left,
+          width: end.width,
+          height: end.height,
+          duration: 1.05,
+          ease: 'power4.inOut'
+        },
+        0.1
+      );
     });
 
-    /* Transição para logo sólida branca enquanto voa */
-    tl.to(
-      logo,
-      {
-        top: end.top,
-        left: end.left,
-        width: end.width,
-        height: end.height,
-        duration: 1.15
-      },
-      0
-    );
+    /* 2) Wipe líquido sobe (como LoaderBlob do EE) */
+    if (wipeSvg && wipePath) {
+      wipeSvg.classList.add('is-active');
 
-    tl.to(
-      fluid,
-      {
-        opacity: 0,
-        duration: 0.55,
-        ease: 'power2.out'
-      },
-      0.25
-    );
+      const wipe = createLiquidWipe(wipePath, {
+        speed: 1100,
+        onHalfway: () => {
+          /* revela página sob o wipe */
+          if (stage) stage.style.opacity = '0';
+          document.body.classList.remove('is-loading');
+          if (navMark) {
+            navMark.style.opacity = '1';
+            navMark.style.visibility = 'visible';
+          }
+          if (logo) logo.style.opacity = '0';
+          heroIn({ skipNavLogo: true });
+        },
+        onInComplete: () => {
+          /* blob cobre tudo → começa a sair */
+          wipe.coverOut();
+        },
+        onOutComplete: () => {
+          if (stopGoo) stopGoo();
+          flyPromise.then(() => {
+            preloader.style.display = 'none';
+            preloader.setAttribute('aria-hidden', 'true');
+          });
+        }
+      });
 
-    tl.to(
-      '.pl-logo-base',
-      {
-        backgroundColor: '#ffffff',
-        duration: 0.55,
-        ease: 'power2.out'
-      },
-      0.25
-    );
-
-    /* Cortina sobe sincronizada com o movimento da logo */
-    tl.to(
-      curtain,
-      {
-        yPercent: -100,
-        duration: 1.05,
-        ease: 'power3.inOut'
-      },
-      0.15
-    );
-
-    tl.to(
-      preloader,
-      {
-        pointerEvents: 'none',
-        duration: 0.01
-      },
-      0.2
-    );
-  }, FILL_MS + 180);
+      /* inicia wipe um pouco depois do FLIP começar */
+      window.setTimeout(() => wipe.coverIn(), 280);
+    } else {
+      flyPromise.then(() => finishPreloader(preloader, true));
+    }
+  }, GOO_MS);
 }
 
 /* ---- Init ---- */
