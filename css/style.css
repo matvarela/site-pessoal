@@ -149,11 +149,13 @@ nav.scrolled {
   min-height: 44px;
 }
 .nav-logo-mark {
-  width: 28px;
-  height: 22px;
+  width: 32px;
+  height: auto;
+  aspect-ratio: 5 / 4;
   flex-shrink: 0;
   display: block;
   object-fit: contain;
+  object-position: center;
 }
 [data-theme="light"] .nav-logo-mark {
   filter: invert(1);
@@ -877,7 +879,7 @@ nav.scrolled {
   .s-title { font-size: 13vw; }
   .nav-logo-divider { display: none; }
   .nav-logo-text { display: none; }
-  .nav-logo-mark { width: 32px; height: 22px; }
+  .nav-logo-mark { width: 36px; height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
