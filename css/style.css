@@ -149,16 +149,15 @@ nav.scrolled {
   min-height: 44px;
 }
 .nav-logo-mark {
-  width: 32px;
-  height: auto;
-  aspect-ratio: 5 / 4;
-  flex-shrink: 0;
+  width: 40px;
+  height: 32px;
+  flex: 0 0 auto;
   display: block;
-  object-fit: contain;
-  object-position: center;
+  overflow: visible;
+  color: var(--fg);
 }
-[data-theme="light"] .nav-logo-mark {
-  filter: invert(1);
+.nav-logo-mark path {
+  fill: currentColor;
 }
 .nav-logo-divider {
   width: 1px;
@@ -879,7 +878,7 @@ nav.scrolled {
   .s-title { font-size: 13vw; }
   .nav-logo-divider { display: none; }
   .nav-logo-text { display: none; }
-  .nav-logo-mark { width: 36px; height: auto; }
+  .nav-logo-mark { width: 40px; height: 32px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
