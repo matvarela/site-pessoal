@@ -28,6 +28,14 @@ const profileData = {
     "Analytics"
   ],
 
+  stats: [
+    { value: 1500, label: "Xícaras de café", suffix: "+" },
+    { value: 200, label: "Dashboards entregues", suffix: "+" },
+    { value: 1200, label: "Horas em cursos e especializações", suffix: "+" },
+    { value: 30, label: "Livros lidos", suffix: "" },
+    { value: 5, label: "Certificações", suffix: "" }
+  ],
+
   about: [
     "Especialista em Dados com sólida trajetória na gestão de ecossistemas complexos de Business Intelligence e Engenharia de Dados, sustentada por cinco certificações Microsoft, incluindo DP-700 e PL-300.",
     "Atualmente, sou responsável pela governança estratégica do ambiente Microsoft Fabric na Rede D'Or, onde gerencio um portfólio de 220 relatórios corporativos voltados à alta diretoria e vice-presidência.",

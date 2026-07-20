@@ -25,6 +25,79 @@ function renderMarquee() {
   track.innerHTML = items.map((t) => `<span class="mq-item">${t}</span>`).join('');
 }
 
+function formatStatValue(n) {
+  return Math.round(n).toLocaleString('pt-BR');
+}
+
+function renderStats() {
+  const container = $('#statsGrid');
+  if (!container || !d.stats) return;
+
+  d.stats.forEach((stat) => {
+    const card = el('article', 'stat-card');
+    card.innerHTML = `
+      <span class="stat-value" data-target="${stat.value}" data-suffix="${stat.suffix || ''}">0${stat.suffix || ''}</span>
+      <span class="stat-label">${stat.label}</span>
+    `;
+    container.appendChild(card);
+  });
+
+  initCountUp();
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function animateCount(el, target, suffix, duration) {
+  const start = performance.now();
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const value = target * easeOutCubic(t);
+    el.textContent = formatStatValue(value) + suffix;
+    if (t < 1) requestAnimationFrame(frame);
+    else el.textContent = formatStatValue(target) + suffix;
+  }
+  requestAnimationFrame(frame);
+}
+
+function initCountUp() {
+  const values = $$('.stat-value[data-target]');
+  if (!values.length) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const run = (el) => {
+    if (el.dataset.counted === '1') return;
+    el.dataset.counted = '1';
+    const target = parseInt(el.dataset.target, 10) || 0;
+    const suffix = el.dataset.suffix || '';
+    if (reduced) {
+      el.textContent = formatStatValue(target) + suffix;
+      return;
+    }
+    animateCount(el, target, suffix, 1400);
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    values.forEach(run);
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        run(entry.target);
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.35, rootMargin: '0px 0px -8% 0px' }
+  );
+
+  values.forEach((el) => observer.observe(el));
+}
+
 function renderExperience() {
   const container = $('#experienceList');
   $('#expCount').textContent = `${padNum(d.experiences.length)} cargos`;
@@ -310,6 +383,7 @@ function initScroll() {
   }
 
   gsap.set('.pcard', { opacity: 0, y: 40 });
+  gsap.set('.stat-card', { opacity: 0, y: 28 });
 
   gsap.utils.toArray('.s-title').forEach((el) => {
     const spans = el.querySelectorAll('.tl span');
@@ -319,6 +393,17 @@ function initScroll() {
       stagger: 0.08,
       ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  gsap.utils.toArray('.stat-card').forEach((card, i) => {
+    gsap.to(card, {
+      opacity: 1,
+      y: 0,
+      duration: 0.65,
+      ease: 'power2.out',
+      delay: i * 0.06,
+      scrollTrigger: { trigger: card, start: 'top 90%' }
     });
   });
 
@@ -394,7 +479,7 @@ function initScroll() {
 }
 
 function revealFallback() {
-  $$('.nav-logo, .nav-right, .pill, .hero-desc, .scroll-hint, .pcard, .about-bio p, .about-side > div, .contact-footer').forEach(
+  $$('.nav-logo, .nav-right, .pill, .hero-desc, .scroll-hint, .pcard, .stat-card, .about-bio p, .about-side > div, .contact-footer').forEach(
     (node) => {
       node.style.opacity = '1';
       node.style.transform = 'none';
@@ -445,6 +530,7 @@ function runPreloader() {
 /* ---- Init ---- */
 document.addEventListener('DOMContentLoaded', () => {
   renderMarquee();
+  renderStats();
   renderExperience();
   renderAbout();
   renderEducation();
