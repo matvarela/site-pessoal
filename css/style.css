@@ -136,6 +136,11 @@ body::after {
   min-height: 1.2em;
   opacity: 0;
 }
+.pl-percent.is-gone {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 body.is-loading {
   overflow: hidden;
@@ -143,6 +148,14 @@ body.is-loading {
 body.is-loading .nav-logo-mark {
   opacity: 0;
   visibility: hidden;
+}
+/* Evita a hero aparecer “crua” sob o loader enquanto a logo voa */
+body.is-loading #hero .hero-desc,
+body.is-loading #hero .pill,
+body.is-loading #hero .scroll-hint,
+body.is-loading .nav-logo,
+body.is-loading .nav-right {
+  opacity: 0;
 }
 
 /* ============================================================

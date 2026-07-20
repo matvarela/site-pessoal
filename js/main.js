@@ -416,8 +416,14 @@ function initCopyEmail() {
 }
 
 /* ---- Animações GSAP ---- */
+let heroStarted = false;
+let scrollStarted = false;
+
 function heroIn(opts) {
   const options = opts || {};
+  if (heroStarted) return;
+  heroStarted = true;
+
   if (typeof gsap === 'undefined') {
     revealFallback();
     return;
@@ -475,6 +481,9 @@ function heroIn(opts) {
 }
 
 function initScroll() {
+  if (scrollStarted) return;
+  scrollStarted = true;
+
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
     revealFallback();
     return;
@@ -637,11 +646,22 @@ function runPreloader() {
   const duration = 1.8;
   const counter = { value: 0 };
 
+  function hidePercent() {
+    if (!percentEl) return;
+    percentEl.textContent = '';
+    percentEl.classList.add('is-gone');
+    percentEl.setAttribute('aria-hidden', 'true');
+    gsap.killTweensOf(percentEl);
+    gsap.set(percentEl, { opacity: 0, visibility: 'hidden', display: 'none' });
+  }
+
   function flyLogoToNav(done) {
     if (!logoEl || !navMark || typeof gsap === 'undefined') {
       done(false);
       return;
     }
+
+    hidePercent();
 
     const start = logoEl.getBoundingClientRect();
     const end = navMark.getBoundingClientRect();
@@ -661,34 +681,23 @@ function runPreloader() {
       filter: isLight ? 'invert(1)' : 'none'
     });
 
-    const tl = gsap.timeline({
+    /* Mantém o fundo preto opaco durante o voo — evita a hero aparecer cedo */
+    gsap.set(preloader, { backgroundColor: '#000000' });
+
+    gsap.to(logoEl, {
+      top: end.top,
+      left: end.left,
+      width: end.width,
+      height: end.height,
+      duration: 1.05,
+      ease: 'power3.inOut',
       onComplete: () => done(true)
     });
-
-    /* Percentual some enquanto a logo começa a voar */
-    if (percentEl) {
-      tl.to(percentEl, { opacity: 0, y: 6, duration: 0.3, ease: 'power2.out' }, 0);
-    }
-
-    /* Cortina preta some em paralelo com o voo */
-    tl.to(preloader, { backgroundColor: 'rgba(0,0,0,0)', duration: 0.9, ease: 'power2.inOut' }, 0.05);
-
-    tl.to(
-      logoEl,
-      {
-        top: end.top,
-        left: end.left,
-        width: end.width,
-        height: end.height,
-        duration: 1.05,
-        ease: 'power3.inOut'
-      },
-      0.08
-    );
   }
 
   function exit() {
     if (typeof gsap === 'undefined') {
+      hidePercent();
       finishPreloader(preloader);
       return;
     }
@@ -697,9 +706,16 @@ function runPreloader() {
       if (ok && navMark) {
         navMark.style.opacity = '1';
         navMark.style.visibility = 'visible';
-        logoEl.style.opacity = '0';
+        if (logoEl) logoEl.style.opacity = '0';
       }
-      finishPreloader(preloader, { skipNavLogo: ok });
+
+      /* Só depois do pouso: dissolve o loader e entra a hero uma vez */
+      gsap.to(preloader, {
+        opacity: 0,
+        duration: 0.45,
+        ease: 'power2.inOut',
+        onComplete: () => finishPreloader(preloader, { skipNavLogo: ok })
+      });
     });
   }
 
@@ -735,7 +751,7 @@ function runPreloader() {
     },
     onComplete: () => {
       if (percentEl) percentEl.textContent = '100%';
-      gsap.delayedCall(0.15, exit);
+      gsap.delayedCall(0.12, exit);
     }
   });
 }
