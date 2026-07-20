@@ -17,6 +17,19 @@
   --font-en: 'Inter', system-ui, sans-serif;
   --font-body: var(--font-pt);
   --pad-x: 44px;
+
+  /* Escala tipográfica — mesma proporção em todo o site */
+  --title-weight: 600;
+  --title-tracking: -0.02em;
+  --title-leading: 1.14;
+  --title-hero: clamp(3.5rem, 11vw, 9.25rem);
+  --title-section: clamp(2.75rem, 7.5vw, 6.25rem);
+  --title-contact: clamp(2.75rem, 8vw, 7.5rem);
+  --label-size: 0.6875rem;          /* 11px */
+  --label-tracking: 0.14em;
+  --label-to-title: 0.22em;          /* gap label → título, relativo ao título */
+  --subtitle-weight: 600;
+  --subtitle-tracking: -0.02em;
 }
 
 [data-theme="light"] {
@@ -81,9 +94,10 @@ body::after {
 }
 .pl-name {
   font-family: var(--font-display);
-  font-size: clamp(28px, 5vw, 56px);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: var(--title-section);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  line-height: var(--title-leading);
   text-transform: none;
   overflow: hidden;
   text-align: center;
@@ -268,21 +282,21 @@ nav.scrolled {
 }
 .hero-eyebrow {
   font-family: var(--font-en);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--label-size);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 20px;
+  margin-bottom: calc(var(--title-hero) * 0.18);
   overflow: hidden;
 }
 .hero-eyebrow span { display: inline-block; transform: translateY(110%); }
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(56px, 11vw, 148px);
-  font-weight: 600;
-  line-height: 0.92;
-  letter-spacing: -0.02em;
+  font-size: var(--title-hero);
+  font-weight: var(--title-weight);
+  line-height: var(--title-leading);
+  letter-spacing: var(--title-tracking);
   margin-bottom: 48px;
 }
 .hero-title .tl { overflow: hidden; display: block; }
@@ -432,18 +446,18 @@ nav.scrolled {
 }
 .s-label {
   font-family: var(--font-en);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--label-size);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: calc(var(--title-section) * 0.12);
 }
 .s-title {
   font-family: var(--font-display);
-  font-size: clamp(48px, 8vw, 100px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 0.92;
+  font-size: var(--title-section);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  line-height: var(--title-leading);
 }
 .s-count {
   font-family: var(--font-en);
@@ -546,10 +560,10 @@ nav.scrolled {
 }
 .pname {
   font-family: var(--font-pt);
-  font-size: clamp(22px, 2.6vw, 34px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-size: clamp(1.35rem, 2.6vw, 2.125rem);
+  font-weight: var(--subtitle-weight);
+  letter-spacing: var(--subtitle-tracking);
+  line-height: 1.2;
 }
 .pyear {
   font-size: 12px;
@@ -641,11 +655,11 @@ nav.scrolled {
 }
 .detail-h {
   font-family: var(--font-en);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--label-size);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 16px;
+  margin-bottom: 1.1em;
 }
 .exp-list,
 .awards-list { display: flex; flex-direction: column; }
@@ -663,9 +677,9 @@ nav.scrolled {
 .ei-co,
 .aw-title {
   font-family: var(--font-pt);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 0.9375rem;
+  font-weight: var(--subtitle-weight);
+  letter-spacing: var(--subtitle-tracking);
 }
 .ei-role,
 .aw-issuer { font-size: 12px; color: var(--muted); }
@@ -699,11 +713,11 @@ nav.scrolled {
 
 .contact-headline {
   font-family: var(--font-display);
-  font-size: clamp(48px, 9vw, 120px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 0.92;
-  margin: 56px 0 72px;
+  font-size: var(--title-contact);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  line-height: var(--title-leading);
+  margin: calc(var(--title-contact) * 0.45) 0 calc(var(--title-contact) * 0.55);
   overflow: hidden;
 }
 .contact-headline .tl { overflow: hidden; display: block; }
