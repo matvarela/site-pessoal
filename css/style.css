@@ -275,7 +275,8 @@ nav.scrolled {
   justify-content: center;
   align-items: center;
   position: relative;
-  z-index: 220;
+  z-index: 320;
+  -webkit-tap-highlight-color: transparent;
 }
 .nav-toggle span {
   width: 22px;
@@ -283,19 +284,98 @@ nav.scrolled {
   background: var(--fg);
   transition: transform 0.3s ease, opacity 0.3s ease;
   display: block;
+  pointer-events: none;
 }
 .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
 .nav-toggle.open span:nth-child(2) { opacity: 0; }
 .nav-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
+/* Painel mobile — irmão do body, fora da nav (evita containing-block do backdrop-filter) */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: var(--bg);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  padding: max(96px, calc(env(safe-area-inset-top) + 72px)) 24px max(48px, env(safe-area-inset-bottom));
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-overflow-scrolling: auto;
+}
+.mobile-nav.open {
+  display: flex;
+}
+.mobile-nav-close {
+  position: absolute;
+  top: max(72px, calc(env(safe-area-inset-top) + 56px));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font-en);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-close span[aria-hidden="true"] {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 300;
+}
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mobile-nav-links a {
+  font-family: var(--font-en);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 8px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-links a.active,
+.mobile-nav-links a:hover { color: var(--fg); }
+
 /* Trava o scroll do site enquanto o menu mobile está aberto */
+html.menu-open,
+body.menu-open {
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
+}
 body.menu-open {
   position: fixed;
   left: 0;
   right: 0;
   width: 100%;
-  overflow: hidden;
-  touch-action: none;
 }
 
 /* ============================================================
@@ -963,54 +1043,28 @@ body.menu-open {
   .theme-btn #tLabel { display: none; }
 
   .nav-toggle { display: flex; }
-  .nav-links {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
-    background: var(--bg);
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 32px;
-    z-index: 180;
-    margin: 0;
-    padding: max(80px, env(safe-area-inset-top)) 24px 48px;
-    overflow: hidden;
-    overscroll-behavior: none;
-    touch-action: none;
-    -webkit-overflow-scrolling: auto;
-  }
-  .nav-links.open { display: flex; }
-  .nav-links a {
-    font-size: 18px;
-    letter-spacing: 0.14em;
-    position: relative;
-    z-index: 1;
-    pointer-events: auto;
-  }
-  .nav-links a::after { bottom: 4px; }
+  .nav-links { display: none !important; }
 
-  /* Controles da nav ficam acima do overlay para fechar (X) */
+  /* Nav acima do painel para o X do hamburger continuar clicável */
   nav.menu-open {
+    z-index: 310;
     left: 0 !important;
     right: 0 !important;
     top: 0 !important;
     width: 100%;
     max-width: none;
     padding: 16px var(--pad-x);
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     border-radius: 0;
+    transition: none;
   }
-  nav.menu-open .nav-logo,
-  nav.menu-open .theme-btn {
-    position: relative;
-    z-index: 220;
+  nav.menu-open.scrolled {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   #hero {

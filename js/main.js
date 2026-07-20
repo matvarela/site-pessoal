@@ -239,32 +239,44 @@ function initNavbar() {
   const navEl = $('#nav');
   const navToggle = $('#navToggle');
   const navLinks = $('#navLinks');
-  const links = navLinks.querySelectorAll('a');
+  const mobileNav = $('#mobileNav');
+  const mobileClose = $('#mobileNavClose');
+  const desktopLinks = navLinks ? navLinks.querySelectorAll('a') : [];
+  const mobileLinks = mobileNav ? mobileNav.querySelectorAll('a') : [];
+  const allNavLinks = [...desktopLinks, ...mobileLinks];
   let navScrolled = false;
   let menuScrollY = 0;
 
   function isMenuOpen() {
-    return navLinks.classList.contains('open');
+    return Boolean(mobileNav && mobileNav.classList.contains('open'));
   }
 
   function lockBodyScroll() {
-    menuScrollY = window.scrollY || window.pageYOffset;
+    menuScrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add('menu-open');
     document.body.classList.add('menu-open');
     document.body.style.top = `-${menuScrollY}px`;
   }
 
   function unlockBodyScroll() {
+    document.documentElement.classList.remove('menu-open');
     document.body.classList.remove('menu-open');
     document.body.style.top = '';
     window.scrollTo(0, menuScrollY);
   }
 
   function setMenuOpen(open) {
-    navLinks.classList.toggle('open', open);
+    if (!mobileNav || !navToggle) return;
+
+    mobileNav.classList.toggle('open', open);
+    mobileNav.hidden = !open;
+    mobileNav.setAttribute('aria-hidden', String(!open));
+
     navToggle.classList.toggle('open', open);
     navEl.classList.toggle('menu-open', open);
     navToggle.setAttribute('aria-expanded', String(open));
     navToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+
     if (open) lockBodyScroll();
     else unlockBodyScroll();
   }
@@ -275,42 +287,66 @@ function initNavbar() {
   }
 
   navToggle.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
     setMenuOpen(!isMenuOpen());
   });
 
-  links.forEach((link) => {
-    link.addEventListener('click', () => {
-      /* Fecha depois do navigate suave ter a posição correta do body */
+  if (mobileClose) {
+    mobileClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMenu();
+    });
+  }
+
+  mobileLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      const target = href ? document.querySelector(href) : null;
       if (!isMenuOpen()) return;
-      navLinks.classList.remove('open');
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      mobileNav.classList.remove('open');
+      mobileNav.hidden = true;
+      mobileNav.setAttribute('aria-hidden', 'true');
       navToggle.classList.remove('open');
       navEl.classList.remove('menu-open');
       navToggle.setAttribute('aria-expanded', 'false');
       navToggle.setAttribute('aria-label', 'Abrir menu');
+      document.documentElement.classList.remove('menu-open');
       document.body.classList.remove('menu-open');
       document.body.style.top = '';
-      /* Mantém a posição visual atual; o handler de âncora faz o scroll */
       window.scrollTo(0, menuScrollY);
+
+      if (target) {
+        requestAnimationFrame(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
     });
   });
 
-  /* Fecha ao tocar no fundo do overlay (fora dos links) */
-  navLinks.addEventListener('click', (e) => {
-    if (e.target === navLinks) closeMenu();
-  });
+  /* Fecha ao tocar no fundo do painel */
+  if (mobileNav) {
+    mobileNav.addEventListener('click', (e) => {
+      if (e.target === mobileNav) closeMenu();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeMenu();
   });
 
-  /* Impede scroll por gesto enquanto o menu está aberto (iOS) */
   document.addEventListener(
     'touchmove',
     (e) => {
       if (!isMenuOpen()) return;
       if (navToggle.contains(e.target)) return;
-      if (e.target.closest && e.target.closest('.nav-links a')) return;
+      if (mobileClose && mobileClose.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('.mobile-nav-links a')) return;
       e.preventDefault();
     },
     { passive: false }
@@ -334,7 +370,7 @@ function initNavbar() {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const id = entry.target.id;
-        links.forEach((l) => {
+        allNavLinks.forEach((l) => {
           l.classList.toggle('active', l.getAttribute('href') === `#${id}`);
         });
       });
@@ -345,7 +381,9 @@ function initNavbar() {
 
   $$('a[href^="#"]').forEach((a) => {
     a.addEventListener('click', (e) => {
-      const target = document.querySelector(a.getAttribute('href'));
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });

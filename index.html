@@ -49,11 +49,24 @@
         <span class="t-icon" id="tIcon" aria-hidden="true">◐</span>
         <span id="tLabel">Claro</span>
       </button>
-      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileNav">
         <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
+
+  <!-- Menu mobile fora da nav — evita bug de position:fixed com backdrop-filter no iOS -->
+  <div id="mobileNav" class="mobile-nav" hidden aria-hidden="true">
+    <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Fechar menu">
+      <span aria-hidden="true">×</span>
+      <span class="mobile-nav-close-label">Fechar</span>
+    </button>
+    <ul class="mobile-nav-links" id="mobileNavLinks">
+      <li><a href="#experience">Experiência</a></li>
+      <li><a href="#about">Sobre</a></li>
+      <li><a href="#contact">Contato</a></li>
+    </ul>
+  </div>
 
   <main>
 
