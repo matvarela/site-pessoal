@@ -20,16 +20,16 @@
 
   /* Escala tipográfica — mesma proporção em todo o site */
   --title-weight: 600;
-  --title-tracking: -0.02em;
-  --title-leading: 1.14;
+  --title-tracking: 0.06em;          /* espaço entre letras, sem soltar o bloco */
+  --title-leading: 0.98;
   --title-hero: clamp(3.5rem, 11vw, 9.25rem);
   --title-section: clamp(2.75rem, 7.5vw, 6.25rem);
   --title-contact: clamp(2.75rem, 8vw, 7.5rem);
   --label-size: 0.6875rem;          /* 11px */
   --label-tracking: 0.14em;
-  --label-to-title: 0.22em;          /* gap label → título, relativo ao título */
+  --label-to-title: 0.22em;
   --subtitle-weight: 600;
-  --subtitle-tracking: -0.02em;
+  --subtitle-tracking: 0.02em;      /* subtítulos Inter: leve abertura */
 }
 
 [data-theme="light"] {
@@ -450,7 +450,7 @@ nav.scrolled {
   letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: calc(var(--title-section) * 0.12);
+  margin-bottom: 0.75em;
 }
 .s-title {
   font-family: var(--font-display);
@@ -610,9 +610,9 @@ nav.scrolled {
 .pmetric { display: flex; flex-direction: column; gap: 4px; }
 .pm-val {
   font-family: var(--font-display);
-  font-size: clamp(36px, 4vw, 52px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
   line-height: 1;
 }
 .pm-label {
@@ -710,14 +710,13 @@ nav.scrolled {
    CONTATO
    ============================================================ */
 #contact { padding: 120px var(--pad-x) 80px; }
-
 .contact-headline {
   font-family: var(--font-display);
   font-size: var(--title-contact);
   font-weight: var(--title-weight);
   letter-spacing: var(--title-tracking);
   line-height: var(--title-leading);
-  margin: calc(var(--title-contact) * 0.45) 0 calc(var(--title-contact) * 0.55);
+  margin: 56px 0 72px;
   overflow: hidden;
 }
 .contact-headline .tl { overflow: hidden; display: block; }
@@ -889,8 +888,8 @@ nav.scrolled {
 }
 
 @media (max-width: 480px) {
-  .hero-title { font-size: 14vw; }
-  .s-title { font-size: 13vw; }
+  .hero-title { font-size: clamp(2.75rem, 14vw, 9.25rem); }
+  .s-title { font-size: clamp(2.5rem, 13vw, 6.25rem); }
   .nav-logo-divider { display: none; }
   .nav-logo-text { display: none; }
   .nav-logo-mark { width: 56px; height: 32px; }
