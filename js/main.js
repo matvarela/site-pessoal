@@ -416,22 +416,29 @@ function initCopyEmail() {
 }
 
 /* ---- Animações GSAP ---- */
-function heroIn() {
+function heroIn(opts) {
+  const options = opts || {};
   if (typeof gsap === 'undefined') {
     revealFallback();
     return;
   }
 
-  gsap.set('.nav-logo', { opacity: 0 });
-  gsap.set('.nav-right', { opacity: 0 });
-  gsap.set('.pill', { opacity: 0, x: 32 });
+  if (options.skipNavLogo) {
+    gsap.set('.nav-logo', { opacity: 1 });
+    gsap.set('.nav-right', { opacity: 0 });
+    gsap.to('.nav-right', { opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.05 });
+  } else {
+    gsap.set('.nav-logo', { opacity: 0 });
+    gsap.set('.nav-right', { opacity: 0 });
+    gsap.to(['.nav-logo', '.nav-right'], {
+      opacity: 1,
+      duration: 0.7,
+      stagger: 0.12,
+      ease: 'power2.out'
+    });
+  }
 
-  gsap.to(['.nav-logo', '.nav-right'], {
-    opacity: 1,
-    duration: 0.7,
-    stagger: 0.12,
-    ease: 'power2.out'
-  });
+  gsap.set('.pill', { opacity: 0, x: 32 });
 
   gsap.to('.hero-title .tl span', {
     y: 0,
@@ -591,19 +598,21 @@ function revealFallback() {
   );
 }
 
-function finishPreloader(preloader) {
+function finishPreloader(preloader, opts) {
+  const options = opts || {};
   document.body.classList.remove('is-loading');
   if (preloader) {
     preloader.style.display = 'none';
     preloader.setAttribute('aria-hidden', 'true');
   }
-  heroIn();
+  heroIn({ skipNavLogo: Boolean(options.skipNavLogo) });
 }
 
 function runPreloader() {
   const preloader = $('#preloader');
   const percentEl = $('#plPercent');
   const logoEl = document.querySelector('#preloader .pl-logo');
+  const navMark = document.querySelector('.nav-logo-mark');
 
   const forcePreloader = new URLSearchParams(window.location.search).has('preloader');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -628,21 +637,73 @@ function runPreloader() {
   const duration = 1.8;
   const counter = { value: 0 };
 
+  function flyLogoToNav(done) {
+    if (!logoEl || !navMark || typeof gsap === 'undefined') {
+      done(false);
+      return;
+    }
+
+    const start = logoEl.getBoundingClientRect();
+    const end = navMark.getBoundingClientRect();
+
+    logoEl.classList.add('is-flying');
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    gsap.set(logoEl, {
+      top: start.top,
+      left: start.left,
+      width: start.width,
+      height: start.height,
+      x: 0,
+      y: 0,
+      position: 'fixed',
+      zIndex: 9010,
+      opacity: 1,
+      filter: isLight ? 'invert(1)' : 'none'
+    });
+
+    const tl = gsap.timeline({
+      onComplete: () => done(true)
+    });
+
+    /* Percentual some enquanto a logo começa a voar */
+    if (percentEl) {
+      tl.to(percentEl, { opacity: 0, y: 6, duration: 0.3, ease: 'power2.out' }, 0);
+    }
+
+    /* Cortina preta some em paralelo com o voo */
+    tl.to(preloader, { backgroundColor: 'rgba(0,0,0,0)', duration: 0.9, ease: 'power2.inOut' }, 0.05);
+
+    tl.to(
+      logoEl,
+      {
+        top: end.top,
+        left: end.left,
+        width: end.width,
+        height: end.height,
+        duration: 1.05,
+        ease: 'power3.inOut'
+      },
+      0.08
+    );
+  }
+
   function exit() {
     if (typeof gsap === 'undefined') {
       finishPreloader(preloader);
       return;
     }
-    gsap.to(preloader, {
-      opacity: 0,
-      duration: 0.55,
-      ease: 'power2.inOut',
-      onComplete: () => finishPreloader(preloader)
+
+    flyLogoToNav((ok) => {
+      if (ok && navMark) {
+        navMark.style.opacity = '1';
+        navMark.style.visibility = 'visible';
+        logoEl.style.opacity = '0';
+      }
+      finishPreloader(preloader, { skipNavLogo: ok });
     });
   }
 
   if (typeof gsap === 'undefined') {
-    /* Fallback sem GSAP: count up simples */
     let n = 0;
     const id = setInterval(() => {
       n += 4;
@@ -674,7 +735,7 @@ function runPreloader() {
     },
     onComplete: () => {
       if (percentEl) percentEl.textContent = '100%';
-      gsap.delayedCall(0.2, exit);
+      gsap.delayedCall(0.15, exit);
     }
   });
 }
