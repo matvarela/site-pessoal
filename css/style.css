@@ -149,15 +149,16 @@ nav.scrolled {
   min-height: 44px;
 }
 .nav-logo-mark {
-  width: 40px;
+  /* SVG real: viewBox 1344×768 → razão 7:4 */
+  width: 56px;
   height: 32px;
   flex: 0 0 auto;
   display: block;
-  overflow: visible;
-  color: var(--fg);
+  object-fit: contain;
+  object-position: center;
 }
-.nav-logo-mark path {
-  fill: currentColor;
+[data-theme="light"] .nav-logo-mark {
+  filter: invert(1);
 }
 .nav-logo-divider {
   width: 1px;
@@ -878,7 +879,7 @@ nav.scrolled {
   .s-title { font-size: 13vw; }
   .nav-logo-divider { display: none; }
   .nav-logo-text { display: none; }
-  .nav-logo-mark { width: 40px; height: 32px; }
+  .nav-logo-mark { width: 56px; height: 32px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
