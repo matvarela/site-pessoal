@@ -22,14 +22,21 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260720-preloader">
 </head>
-<body>
+<body class="is-loading">
 
-  <!-- Preloader -->
-  <div id="preloader" aria-hidden="true">
-    <div class="pl-name"><span>Matheus Varela</span></div>
-    <div class="pl-bar-wrap"><div class="pl-bar" id="plBar"></div></div>
+  <!-- Preloader — logo como máscara + gradiente neon (inspirado em eleven-eleven) -->
+  <div id="preloader" aria-hidden="true" role="status" aria-label="Carregando">
+    <div class="pl-curtain" id="plCurtain"></div>
+    <div class="pl-logo" id="plLogo">
+      <div class="pl-logo-mask">
+        <div class="pl-logo-base" aria-hidden="true"></div>
+        <div class="pl-logo-fluid" id="plFluid" aria-hidden="true">
+          <div class="pl-logo-orb"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Nav — logo assinatura (ícone | Matheus Varela) no canto superior esquerdo -->
@@ -207,7 +214,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/data.js?v=20260720-preloader"></script>
+  <script src="js/main.js?v=20260720-preloader"></script>
 </body>
 </html>

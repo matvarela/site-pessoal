@@ -90,44 +90,104 @@ body::after {
 }
 
 /* ============================================================
-   PRELOADER
+   PRELOADER — logo máscara + gradiente fluido → nav (FLIP)
    ============================================================ */
 #preloader {
   position: fixed;
   inset: 0;
-  background: var(--bg);
   z-index: 9000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 20px;
+  pointer-events: all;
 }
-.pl-name {
-  font-family: var(--font-display);
-  font-size: clamp(1.75rem, 8vw, var(--title-section));
-  font-weight: var(--title-weight);
-  letter-spacing: var(--title-tracking);
-  line-height: var(--title-leading);
-  text-transform: none;
-  overflow: hidden;
-  text-align: center;
-  max-width: min(100%, 92vw);
-  padding: 0 16px;
-  word-break: break-word;
+.pl-curtain {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 0;
 }
-.pl-name span { display: inline-block; transform: translateY(110%); }
-.pl-bar-wrap {
-  width: 160px;
-  height: 1px;
-  background: var(--border);
-  overflow: hidden;
+.pl-logo {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(72vw, 420px);
+  aspect-ratio: 1344 / 768;
+  transform: translate(-50%, -50%);
+  z-index: 9001;
+  will-change: transform, top, left, width, height;
+  pointer-events: none;
 }
-.pl-bar {
+.pl-logo-mask {
+  position: relative;
+  width: 100%;
   height: 100%;
-  width: 0;
-  background: var(--fg);
-  transition: width 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  -webkit-mask-image: url('../assets/logo-mark.svg');
+  mask-image: url('../assets/logo-mark.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-mode: luminance;
+  mask-mode: luminance;
+}
+.pl-logo-base {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.14);
+}
+.pl-logo-fluid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: inset(100% 0 0 0);
+  will-change: clip-path;
+}
+.pl-logo-orb {
+  position: absolute;
+  inset: -60%;
+  width: 220%;
+  height: 220%;
+  background:
+    radial-gradient(circle at 22% 28%, #c084fc 0%, transparent 42%),
+    radial-gradient(circle at 78% 18%, #22d3ee 0%, transparent 40%),
+    radial-gradient(circle at 48% 78%, #f472b6 0%, transparent 45%),
+    radial-gradient(circle at 70% 55%, #818cf8 0%, transparent 38%),
+    radial-gradient(circle at 30% 60%, #2dd4bf 0%, transparent 36%),
+    linear-gradient(135deg, #4c1d95 0%, #0e7490 45%, #9d174d 100%);
+  background-size: 100% 100%;
+  animation: plOrb 3.2s ease-in-out infinite alternate;
+  filter: saturate(1.35) brightness(1.15);
+}
+@keyframes plOrb {
+  0% { transform: translate(-6%, -4%) rotate(0deg) scale(1); }
+  50% { transform: translate(4%, 6%) rotate(12deg) scale(1.08); }
+  100% { transform: translate(8%, -2%) rotate(-8deg) scale(1.04); }
+}
+
+/* Durante o preloader: nav oculta; a marca voa via FLIP compartilhado */
+body.is-loading {
+  overflow: hidden;
+}
+body.is-loading #nav,
+body.is-loading #mobileNav {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+body.is-loading .nav-logo-mark {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.pl-logo.is-solid .pl-logo-base {
+  background: #ffffff;
+}
+.pl-logo.is-solid .pl-logo-fluid {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-logo-orb { animation: none; }
 }
 
 /* ============================================================
@@ -1066,6 +1126,10 @@ body.menu-open {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+  nav.menu-open .theme-btn {
+    visibility: hidden;
+    pointer-events: none;
+  }
 
   #hero {
     padding-bottom: max(40px, calc(40px + env(safe-area-inset-bottom)));
@@ -1187,7 +1251,7 @@ body.menu-open {
   .marquee-track { animation: none; }
   .sh-line::after { animation: none; }
   .pill-dot { animation: none; }
-  .pl-name span { transform: none; }
+  .pl-logo-orb { animation: none; }
   .hero-title .tl span,
   .hero-eyebrow span,
   .s-title .tl span { transform: none; }

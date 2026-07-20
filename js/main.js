@@ -416,22 +416,30 @@ function initCopyEmail() {
 }
 
 /* ---- Animações GSAP ---- */
-function heroIn() {
+function heroIn(opts) {
+  const options = opts || {};
   if (typeof gsap === 'undefined') {
     revealFallback();
     return;
   }
 
-  gsap.set('.nav-logo', { opacity: 0 });
-  gsap.set('.nav-right', { opacity: 0 });
+  if (options.skipNavLogo) {
+    gsap.set('.nav-logo', { opacity: 1 });
+    gsap.set('.nav-right', { opacity: 0 });
+    gsap.to('.nav-right', { opacity: 1, duration: 0.7, ease: 'power2.out', delay: 0.05 });
+  } else {
+    gsap.set('.nav-logo', { opacity: 0 });
+    gsap.set('.nav-right', { opacity: 0 });
+    gsap.to(['.nav-logo', '.nav-right'], {
+      opacity: 1,
+      duration: 0.7,
+      stagger: 0.12,
+      ease: 'power2.out'
+    });
+  }
+
   gsap.set('.pill', { opacity: 0, x: 32 });
 
-  gsap.to(['.nav-logo', '.nav-right'], {
-    opacity: 1,
-    duration: 0.7,
-    stagger: 0.12,
-    ease: 'power2.out'
-  });
   gsap.to('.hero-title .tl span', {
     y: 0,
     duration: 1.05,
@@ -576,52 +584,154 @@ function initScroll() {
 }
 
 function revealFallback() {
+  document.body.classList.remove('is-loading');
   $$('.nav-logo, .nav-right, .pill, .hero-desc, .scroll-hint, .pcard, .stat-card, .about-bio p, .about-side > div, .contact-footer').forEach(
     (node) => {
       node.style.opacity = '1';
       node.style.transform = 'none';
     }
   );
-  $$('.hero-title .tl span, .hero-eyebrow span, .s-title .tl span, .contact-headline .tl span, .pl-name span').forEach(
+  $$('.hero-title .tl span, .hero-eyebrow span, .s-title .tl span, .contact-headline .tl span').forEach(
     (node) => {
       node.style.transform = 'none';
     }
   );
 }
 
+function finishPreloader(preloader, skipNavLogo) {
+  document.body.classList.remove('is-loading');
+  if (preloader) {
+    preloader.style.display = 'none';
+    preloader.setAttribute('aria-hidden', 'true');
+  }
+  heroIn({ skipNavLogo: Boolean(skipNavLogo) });
+}
+
 function runPreloader() {
   const preloader = $('#preloader');
-  const plBar = $('#plBar');
-  const plName = document.querySelector('.pl-name span');
+  const curtain = $('#plCurtain');
+  const logo = $('#plLogo');
+  const fluid = $('#plFluid');
+  const navMark = document.querySelector('.nav-logo-mark');
 
-  if (typeof gsap === 'undefined') {
-    preloader.style.display = 'none';
+  const forcePreloader = new URLSearchParams(window.location.search).has('preloader');
+  const skipAnim =
+    typeof gsap === 'undefined' ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+    (!forcePreloader && sessionStorage.getItem('mv_preloader_v3') === '1');
+
+  if (!preloader) {
+    document.body.classList.remove('is-loading');
     heroIn();
     return;
   }
 
-  if (sessionStorage.getItem('mv_visited')) {
-    preloader.style.display = 'none';
-    heroIn();
+  if (skipAnim) {
+    finishPreloader(preloader, false);
     return;
   }
 
-  sessionStorage.setItem('mv_visited', '1');
-  gsap.to(plName, { y: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 });
-  setTimeout(() => {
-    plBar.style.width = '100%';
-  }, 150);
-  setTimeout(() => {
-    gsap.to(preloader, {
-      yPercent: -100,
-      duration: 0.9,
-      ease: 'power3.inOut',
+  if (!forcePreloader) {
+    sessionStorage.setItem('mv_preloader_v3', '1');
+  }
+
+  const FILL_MS = 2500;
+
+  /* 1) Preenchimento do gradiente dentro da máscara da logo */
+  gsap.fromTo(
+    fluid,
+    { clipPath: 'inset(100% 0 0 0)' },
+    {
+      clipPath: 'inset(0% 0 0 0)',
+      duration: FILL_MS / 1000,
+      ease: 'power2.inOut'
+    }
+  );
+
+  /* 2) Após o fill: FLIP da logo centro → marca da nav + cortina some */
+  window.setTimeout(() => {
+    if (!logo || !navMark || !curtain) {
+      finishPreloader(preloader, false);
+      return;
+    }
+
+    const start = logo.getBoundingClientRect();
+    const end = navMark.getBoundingClientRect();
+
+    /* Congela a logo em top/left absolutos (sem translate -50%) para o FLIP */
+    gsap.set(logo, {
+      transform: 'none',
+      top: start.top,
+      left: start.left,
+      width: start.width,
+      height: start.height,
+      x: 0,
+      y: 0
+    });
+
+    const tl = gsap.timeline({
+      defaults: { ease: 'power4.inOut' },
       onComplete: () => {
-        preloader.style.display = 'none';
-        heroIn();
+        navMark.style.opacity = '1';
+        navMark.style.visibility = 'visible';
+        if (logo) logo.style.opacity = '0';
+        finishPreloader(preloader, true);
       }
     });
-  }, 1300);
+
+    /* Transição para logo sólida branca enquanto voa */
+    tl.to(
+      logo,
+      {
+        top: end.top,
+        left: end.left,
+        width: end.width,
+        height: end.height,
+        duration: 1.15
+      },
+      0
+    );
+
+    tl.to(
+      fluid,
+      {
+        opacity: 0,
+        duration: 0.55,
+        ease: 'power2.out'
+      },
+      0.25
+    );
+
+    tl.to(
+      '.pl-logo-base',
+      {
+        backgroundColor: '#ffffff',
+        duration: 0.55,
+        ease: 'power2.out'
+      },
+      0.25
+    );
+
+    /* Cortina sobe sincronizada com o movimento da logo */
+    tl.to(
+      curtain,
+      {
+        yPercent: -100,
+        duration: 1.05,
+        ease: 'power3.inOut'
+      },
+      0.15
+    );
+
+    tl.to(
+      preloader,
+      {
+        pointerEvents: 'none',
+        duration: 0.01
+      },
+      0.2
+    );
+  }, FILL_MS + 180);
 }
 
 /* ---- Init ---- */
