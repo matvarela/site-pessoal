@@ -1261,87 +1261,67 @@ button:focus-visible {
 .intro-player-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 60% 40%, rgba(255,255,255,0.04) 0%, transparent 65%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);
   pointer-events: none;
+}
+
+.intro-player-logo {
+  position: absolute;
+  top: 28px;
+  left: 44px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+.intro-player-logo img {
+  height: 32px;
+  width: auto;
 }
 
 .intro-player-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 32px;
-  text-align: center;
+  justify-content: center;
   z-index: 1;
-}
-
-.intro-player-label {
-  font-family: var(--font-display);
-  font-size: 0.6875rem;
-  letter-spacing: 0.22em;
-  color: rgba(255,255,255,0.38);
-  text-transform: uppercase;
 }
 
 #introPlayBtn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 18px;
+  justify-content: center;
   background: none;
   border: none;
   cursor: pointer;
   color: #fff;
+  padding: 0;
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-#introPlayBtn:hover { transform: scale(1.05); }
+#introPlayBtn:hover { transform: scale(1.08); }
 #introPlayBtn:hover .play-circle {
-  background: rgba(255,255,255,0.14);
-  border-color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.8);
+  box-shadow: 0 0 30px rgba(255,255,255,0.15);
 }
 
 .play-circle {
-  width: 96px;
-  height: 96px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s, border-color 0.3s;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .play-circle svg {
-  width: 32px;
-  height: 32px;
-  margin-left: 4px; /* optical center for triangle */
+  width: 30px;
+  height: 30px;
+  /* Centered optically for right-facing play triangle */
+  margin-left: 3px;
 }
-
-.play-label {
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: rgba(255,255,255,0.8);
-}
-
-.intro-player-skip {
-  margin-top: 8px;
-}
-#introSkipBtn {
-  font-family: var(--font-display);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  color: rgba(255,255,255,0.3);
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: color 0.25s;
-  padding: 8px;
-}
-#introSkipBtn:hover { color: rgba(255,255,255,0.75); }
 
 /* --- Video wrapper (during playback) --- */
 #introVideoWrapper {
