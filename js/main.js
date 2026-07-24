@@ -758,22 +758,27 @@ function runPreloader() {
       playerScreen.classList.add('visible');
     }
 
+    let isFinishing = false;
     function finishIntro() {
-      const doReveal = () => {
-        gsap.to(container, { opacity: 0, duration: 0.6, ease: 'power2.out', onComplete: () => {
-          container.style.display = 'none';
-          revealHero(false);
-        }});
-      };
+      if (isFinishing) return;
+      isFinishing = true;
 
-      // hide video wrapper first if visible
-      if (videoWrapper && videoWrapper.classList.contains('visible')) {
-        video.pause();
-        videoWrapper.classList.remove('visible');
-        setTimeout(doReveal, 300);
+      // Start revealing hero immediately so it cross-fades behind the fading container
+      revealHero(false);
+
+      if (typeof gsap !== 'undefined') {
+        gsap.to(container, {
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power2.inOut',
+          onComplete: () => {
+            container.style.display = 'none';
+            if (video) video.pause();
+          }
+        });
       } else {
-        playerScreen.classList.remove('visible');
-        setTimeout(doReveal, 300);
+        container.style.display = 'none';
+        if (video) video.pause();
       }
     }
 
@@ -793,7 +798,7 @@ function runPreloader() {
             videoWrapper.classList.add('visible');
             video.play().catch(() => finishIntro());
           });
-        }, 400);
+        }, 300);
       });
     }
 
@@ -802,7 +807,14 @@ function runPreloader() {
       videoSkipBtn.addEventListener('click', finishIntro);
     }
 
-    // Video ended
+    // Pre-trigger cross-fade 0.7s before video ends for ultra fluid transition
+    video.addEventListener('timeupdate', () => {
+      if (video.duration && (video.duration - video.currentTime <= 0.7)) {
+        finishIntro();
+      }
+    });
+
+    // Fallback if ended triggers first
     video.addEventListener('ended', finishIntro);
   }
 
