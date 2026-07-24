@@ -35,10 +35,30 @@
   </div>
 
   <!-- Vídeo de introdução -->
-  <div id="introVideoContainer" aria-hidden="true" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000; display:none; background:#000; opacity:0;">
-    <video id="introVideo" style="width:100%; height:100%; object-fit:cover;" playsinline>
-      <source src="assets/intro_video.mp4" type="video/mp4">
-    </video>
+  <div id="introVideoContainer" aria-hidden="true">
+    <!-- Tela de entrada com botão de play -->
+    <div id="introPlayerScreen">
+      <div class="intro-player-bg"></div>
+      <div class="intro-player-content">
+        <p class="intro-player-label">MATHEUS VARELA</p>
+        <button id="introPlayBtn" aria-label="Reproduzir vídeo de apresentação">
+          <span class="play-circle">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <polygon points="18,12 38,24 18,36" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="play-label">Assistir apresentação</span>
+        </button>
+        <p class="intro-player-skip"><button id="introSkipBtn">Pular &rarr;</button></p>
+      </div>
+    </div>
+    <!-- Player de vídeo -->
+    <div id="introVideoWrapper">
+      <video id="introVideo" style="width:100%; height:100%; object-fit:cover;" playsinline>
+        <source src="assets/intro_video.mp4" type="video/mp4">
+      </video>
+      <button id="introVideoSkip" aria-label="Pular vídeo">Pular <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><path d="M2 12L12 2M12 2H4M12 2V10"/></svg></button>
+    </div>
   </div>
 
   <!-- Nav — logo assinatura (ícone | Matheus Varela) no canto superior esquerdo -->

@@ -721,46 +721,91 @@ function runPreloader() {
     hidePercent();
     if (logoEl) logoEl.style.opacity = '0';
     gsap.set(preloader, { pointerEvents: 'none' });
-    
+
     gsap.to(preloader, {
       opacity: 0,
       duration: 0.55,
       ease: 'power2.out',
       onComplete: () => {
         dismissPreloader();
-        
-        const videoContainer = document.getElementById('introVideoContainer');
-        const video = document.getElementById('introVideo');
-        
-        if (videoContainer && video) {
-          videoContainer.style.display = 'block';
-          gsap.to(videoContainer, { opacity: 1, duration: 0.5 });
-          
-          video.play().catch(e => {
-            console.log('Autoplay prevented:', e);
-            // Fallback immediately if video cannot play
-            gsap.to(videoContainer, { opacity: 0, duration: 0.5, onComplete: () => {
-              videoContainer.style.display = 'none';
-              revealHero(false);
-            }});
-          });
-          
-          video.addEventListener('ended', () => {
-            gsap.to(videoContainer, {
-              opacity: 0, 
-              duration: 0.5, 
-              onComplete: () => {
-                videoContainer.style.display = 'none';
-                revealHero(false);
-              }
-            });
-          });
-        } else {
-          revealHero(false);
-        }
+        showIntroPlayer();
       }
     });
   }
+
+  function showIntroPlayer() {
+    const container = document.getElementById('introVideoContainer');
+    const playerScreen = document.getElementById('introPlayerScreen');
+    const videoWrapper = document.getElementById('introVideoWrapper');
+    const video = document.getElementById('introVideo');
+    const playBtn = document.getElementById('introPlayBtn');
+    const skipBtn = document.getElementById('introSkipBtn');
+    const videoSkipBtn = document.getElementById('introVideoSkip');
+
+    if (!container || !playerScreen || !video) {
+      revealHero(false);
+      return;
+    }
+
+    // Show container
+    container.style.display = 'block';
+    if (typeof gsap !== 'undefined') {
+      gsap.to(container, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
+        playerScreen.classList.add('visible');
+      }});
+    } else {
+      container.style.opacity = '1';
+      playerScreen.classList.add('visible');
+    }
+
+    function finishIntro() {
+      const doReveal = () => {
+        gsap.to(container, { opacity: 0, duration: 0.6, ease: 'power2.out', onComplete: () => {
+          container.style.display = 'none';
+          revealHero(false);
+        }});
+      };
+
+      // hide video wrapper first if visible
+      if (videoWrapper && videoWrapper.classList.contains('visible')) {
+        video.pause();
+        videoWrapper.classList.remove('visible');
+        setTimeout(doReveal, 300);
+      } else {
+        playerScreen.classList.remove('visible');
+        setTimeout(doReveal, 300);
+      }
+    }
+
+    // Skip button (player screen)
+    if (skipBtn) {
+      skipBtn.addEventListener('click', finishIntro);
+    }
+
+    // Play button
+    if (playBtn) {
+      playBtn.addEventListener('click', () => {
+        // Transition from player screen to video
+        playerScreen.classList.remove('visible');
+        setTimeout(() => {
+          videoWrapper.style.display = 'block';
+          requestAnimationFrame(() => {
+            videoWrapper.classList.add('visible');
+            video.play().catch(() => finishIntro());
+          });
+        }, 400);
+      });
+    }
+
+    // Skip during video
+    if (videoSkipBtn) {
+      videoSkipBtn.addEventListener('click', finishIntro);
+    }
+
+    // Video ended
+    video.addEventListener('ended', finishIntro);
+  }
+
 
   if (typeof gsap === 'undefined') {
     let n = 0;
