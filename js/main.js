@@ -718,17 +718,47 @@ function runPreloader() {
       return;
     }
 
-    flyLogoToNav((ok) => {
-      /* Ao pousar a logo: hero entra junto com o fade do preto */
-      revealHero(ok);
-
-      gsap.set(preloader, { pointerEvents: 'none' });
-      gsap.to(preloader, {
-        opacity: 0,
-        duration: 0.55,
-        ease: 'power2.out',
-        onComplete: dismissPreloader
-      });
+    hidePercent();
+    if (logoEl) logoEl.style.opacity = '0';
+    gsap.set(preloader, { pointerEvents: 'none' });
+    
+    gsap.to(preloader, {
+      opacity: 0,
+      duration: 0.55,
+      ease: 'power2.out',
+      onComplete: () => {
+        dismissPreloader();
+        
+        const videoContainer = document.getElementById('introVideoContainer');
+        const video = document.getElementById('introVideo');
+        
+        if (videoContainer && video) {
+          videoContainer.style.display = 'block';
+          gsap.to(videoContainer, { opacity: 1, duration: 0.5 });
+          
+          video.play().catch(e => {
+            console.log('Autoplay prevented:', e);
+            // Fallback immediately if video cannot play
+            gsap.to(videoContainer, { opacity: 0, duration: 0.5, onComplete: () => {
+              videoContainer.style.display = 'none';
+              revealHero(false);
+            }});
+          });
+          
+          video.addEventListener('ended', () => {
+            gsap.to(videoContainer, {
+              opacity: 0, 
+              duration: 0.5, 
+              onComplete: () => {
+                videoContainer.style.display = 'none';
+                revealHero(false);
+              }
+            });
+          });
+        } else {
+          revealHero(false);
+        }
+      }
     });
   }
 
