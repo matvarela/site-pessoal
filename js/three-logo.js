@@ -78,10 +78,25 @@ window.addEventListener('mousemove', (e) => {
   // Normalize mouse coordinates from -1 to 1
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  if (logoMesh) {
+    // Anime com GSAP (com easing suave como 'power2.out' e duração de ~0.8s)
+    gsap.to(logoMesh.rotation, {
+      x: mouse.y * 0.5,
+      y: mouse.x * 0.5,
+      duration: 0.8,
+      ease: "power2.out",
+      overwrite: "auto"
+    });
+  }
 });
 
+
+let isMouseDown = false;
+let returnTween = null;
+let spinTween = null;
+
 window.addEventListener('mousedown', (e) => {
-  // Update mouse vector for raycaster (in case it wasn't updated via mousemove)
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -90,38 +105,37 @@ window.addEventListener('mousedown', (e) => {
   if (logoMesh) {
     const intersects = raycaster.intersectObject(logoGroup, true);
     if (intersects.length > 0) {
-      isSpinning = true;
+      isMouseDown = true;
+      if (returnTween) returnTween.kill();
+
+      // Continuous spin
+      spinTween = gsap.to(logoMesh.rotation, {
+        y: "+=" + Math.PI * 10, // Just keep spinning
+        duration: 5.0,
+        ease: "power2.in",
+        overwrite: "auto"
+      });
     }
   }
 });
 
-window.addEventListener('mouseup', () => {
-    isSpinning = false;
-});
-window.addEventListener('mouseleave', () => {
-    isSpinning = false;
+window.addEventListener('mouseup', (e) => {
+  if (isMouseDown && logoMesh) {
+    isMouseDown = false;
+    if (spinTween) spinTween.kill();
+
+    // Slow return
+    returnTween = gsap.to(logoMesh.rotation, {
+      y: Math.round(logoMesh.rotation.y / (Math.PI * 2)) * Math.PI * 2, // nearest full rotation
+      duration: 1.5,
+      ease: "power2.out",
+      overwrite: "auto"
+    });
+  }
 });
 
 // 8. Render Loop
 renderer.setAnimationLoop((time) => {
-  if (logoMesh) {
-    if (isSpinning) {
-      // Fast spin when pressed
-      baseRotationY += 0.1;
-    } else {
-      // Smoothly unwind baseRotationY back to 0
-      baseRotationY += (0 - baseRotationY) * 0.05;
-    }
-
-    // Calculate the parallax offset from mouse relative to base spin
-    const targetRotationY = baseRotationY + mouse.x * 0.5;
-    const targetRotationX = mouse.y * 0.5;
-
-    // Smoothly animate towards target
-    logoMesh.rotation.y += (targetRotationY - logoMesh.rotation.y) * 0.05;
-    logoMesh.rotation.x += (targetRotationX - logoMesh.rotation.x) * 0.05;
-  }
-
   renderer.render(scene, camera);
 });
 
@@ -133,13 +147,13 @@ function setupGSAPWaypoints() {
 
   // A. Set Initial State (Right side of the Hero section)
   gsap.set(logoGroup.position, {
-      x: 3,
-      y: 1,
+      x: 3.5,
+      y: 0.5,
       z: 0
   });
 
   gsap.set(logoGroup.scale, {
-      x: 1, y: 1, z: 1
+      x: 0.25, y: 0.25, z: 0.25
   });
 
   // B. Create the Timeline linked to scroll
