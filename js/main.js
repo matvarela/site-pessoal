@@ -785,9 +785,6 @@ function initAsciiHands() {
   const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
   const THRESHOLD  = 0.06;   // minimum brightness to render a char
   const HOVER_R    = 100;    // mouse influence radius (px)
-  const SPRING_K   = 0.08;
-  const DAMPING    = 0.82;
-  const PUSH_STR   = 12;
   const CHAR_SET   = ['.', ':', ';', '-', '=', '+', 'x', '#', '%', '@', '$'];
   const SCRAMBLE   = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
 
@@ -937,14 +934,12 @@ function initAsciiHands() {
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      /* Mouse repulsion (spring physics) */
+      /* Mouse proximity (Scramble effect only, no physical deformation) */
       const dx = p.x - mouseX, dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < HOVER_R && dist > 0) {
         const f = 1 - dist / HOVER_R;
-        p.vx += (dx / dist) * f * f * PUSH_STR;
-        p.vy += (dy / dist) * f * f * PUSH_STR;
         p.hl  = Math.max(p.hl, f);
         /* faster glyph scramble near cursor */
         if (Math.random() < f * 0.4)
@@ -962,21 +957,12 @@ function initAsciiHands() {
         }
       }
 
-      /* Spring return to base position */
-      p.vx = (p.vx + (p.baseX - p.x) * SPRING_K) * DAMPING;
-      p.vy = (p.vy + (p.baseY - p.y) * SPRING_K) * DAMPING;
-      p.x += p.vx;
-      p.y += p.vy;
-
-      /* Subtle organic float via sine */
-      const wave = Math.sin(t * 0.9 + p.baseX * 0.011 + p.baseY * 0.009) * 1.3;
-
       const alpha = p.hl > 0.1
         ? Math.min(1, p.density * 0.75 + p.hl * 0.25)
         : p.density * 0.55;
 
       ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-      ctx.fillText(p.currentChar, p.x, p.y + wave);
+      ctx.fillText(p.currentChar, p.x, p.y);
     }
   }
 
