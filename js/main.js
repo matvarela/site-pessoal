@@ -787,8 +787,8 @@ function initAsciiHands() {
   let height = 0;
   let cols = 0;
   let rows = 0;
-  const cellW = 8;
-  const cellH = 11;
+  const cellW = 6;
+  const cellH = 9;
   let grid = [];
 
   let mouseX = -1000;
@@ -814,8 +814,8 @@ function initAsciiHands() {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 2.2);
-    offscreen.height = Math.floor(height / 2.2);
+    offscreen.width = Math.floor(width / 1.5);
+    offscreen.height = Math.floor(height / 1.5);
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
@@ -860,7 +860,7 @@ function initAsciiHands() {
         // Luminance calculation
         const brightness = ((red * 0.299 + green * 0.587 + blue * 0.114) / 255) * alpha;
 
-        if (brightness > 0.05) {
+        if (brightness > 0.04) {
           const charIndex = Math.min(
             charSet.length - 1,
             Math.floor(brightness * (charSet.length - 1))
@@ -894,13 +894,13 @@ function initAsciiHands() {
   });
 
   function render() {
-    ctx.clearRect(0, 0, width, height);
-    ctx.font = '10px "JetBrains Mono", "Space Grotesk", monospace';
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = '8px "JetBrains Mono", "Space Grotesk", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-    const baseColorRGB = isLight ? '0, 0, 0' : '255, 255, 255';
+    const baseColorRGB = '255, 255, 255';
 
     const hoverRadius = 120;
     const springK = 0.08;
@@ -954,12 +954,12 @@ function initAsciiHands() {
       const drawX = p.x + waveX;
       const drawY = p.y + waveY;
 
-      // 4. Color & Opacity
-      const opacity = Math.min(1, p.density * 0.65 + p.highlight * 0.35);
+      // 4. Color & Opacity (high-contrast white/gray on pure black)
+      const opacity = Math.min(1, p.density * 0.7 + p.highlight * 0.3);
       if (p.highlight > 0.15) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.42})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.5})`;
       }
 
       ctx.fillText(p.currentChar, drawX, drawY);
