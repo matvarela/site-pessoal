@@ -2,7 +2,7 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: ["main", "master", "feat/*", "jules*"]
+    branches: ["main", "master", "feature/*", "feat/*", "jules*"]
   workflow_dispatch:
 
 permissions:
