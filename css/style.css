@@ -1300,3 +1300,16 @@ button:focus-visible {
   pointer-events: auto;
   padding: 0 clamp(16px, 4vw, 80px);
 }
+
+/* ============================================================
+   3D Spline Logo Background Overlay
+   ============================================================ */
+#splineCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Behind all regular site content */
+  pointer-events: none; /* Let clicks pass through to the site */
+}
