@@ -27,7 +27,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearAlpha(0); // Transparent
 
 // 4. Wrap the model so GSAP animates the wrapper, and Mouse animates the model itself
-const logoGroup = new THREE.Group();
+const logoGroup = new THREE.Group(); // For ScrollTrigger
+const spinGroup = new THREE.Group(); // For mousedown spin
+logoGroup.add(spinGroup);
 scene.add(logoGroup);
 
 let logoMesh = null;
@@ -43,7 +45,7 @@ loader.load(
     // logoMesh.scale.set(1, 1, 1);
 
     // Add to group
-    logoGroup.add(logoMesh);
+    spinGroup.add(logoMesh);
 
     // Hide the model initially to avoid a flash before GSAP sets its position
     logoGroup.visible = false;
@@ -109,7 +111,7 @@ window.addEventListener('mousedown', (e) => {
       if (returnTween) returnTween.kill();
 
       // Continuous spin
-      spinTween = gsap.to(logoMesh.rotation, {
+      spinTween = gsap.to(spinGroup.rotation, {
         y: "+=" + Math.PI * 10, // Just keep spinning
         duration: 5.0,
         ease: "power2.in",
@@ -125,8 +127,8 @@ window.addEventListener('mouseup', (e) => {
     if (spinTween) spinTween.kill();
 
     // Slow return
-    returnTween = gsap.to(logoMesh.rotation, {
-      y: Math.round(logoMesh.rotation.y / (Math.PI * 2)) * Math.PI * 2, // nearest full rotation
+    returnTween = gsap.to(spinGroup.rotation, {
+      y: Math.round(spinGroup.rotation.y / (Math.PI * 2)) * Math.PI * 2, // nearest full rotation
       duration: 1.5,
       ease: "power2.out",
       overwrite: "auto"
@@ -153,7 +155,7 @@ function setupGSAPWaypoints() {
   });
 
   gsap.set(logoGroup.scale, {
-      x: 0.25, y: 0.25, z: 0.25
+      x: 0.05, y: 0.05, z: 0.05
   });
 
   // B. Create the Timeline linked to scroll
