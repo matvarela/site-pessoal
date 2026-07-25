@@ -1244,7 +1244,7 @@ button:focus-visible {
   aspect-ratio: 16 / 7;
   max-height: 420px;
   min-height: 280px;
-  margin: 20px 0 0 0;
+  margin: 16px 0 24px 0;
   overflow: hidden;
   display: flex;
   align-items: center;
