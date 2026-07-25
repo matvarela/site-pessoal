@@ -880,35 +880,27 @@ function initAsciiHands() {
   let mouseX = -1000;
   let mouseY = -1000;
 
-  // Load individual left and right hand images
-  const imgLeft = new Image();
-  imgLeft.src = 'assets/hand_left_clean.png';
-  let leftLoaded = false;
+  // Load exact GoodFella hands asset
+  const imgHand = new Image();
+  imgHand.src = 'assets/goodfella_hand.png';
+  let handLoaded = false;
 
-  const imgRight = new Image();
-  imgRight.src = 'assets/hand_right_clean.png';
-  let rightLoaded = false;
-
-  function checkLoaded() {
-    if (leftLoaded && rightLoaded) {
-      resize();
-    }
-  }
-
-  imgLeft.onload = () => { leftLoaded = true; checkLoaded(); };
-  imgRight.onload = () => { rightLoaded = true; checkLoaded(); };
+  imgHand.onload = () => {
+    handLoaded = true;
+    resize();
+  };
 
   function resize() {
     const rect = container.getBoundingClientRect();
     width = rect.width || 1000;
-    height = rect.height || 320;
+    height = rect.height || 360;
 
     canvas.width = width * window.devicePixelRatio;
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 2.5);
-    offscreen.height = Math.floor(height / 2.5);
+    offscreen.width = Math.floor(width / 2.4);
+    offscreen.height = Math.floor(height / 2.4);
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
@@ -919,25 +911,30 @@ function initAsciiHands() {
 
   function drawAdamHandsImage() {
     offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-    if (!leftLoaded || !rightLoaded) return;
+    if (!handLoaded) return;
 
-    const targetH = offscreen.height * 0.72;
+    // Natural aspect ratio of 665x1071
+    const imgAspect = imgHand.width / imgHand.height;
+    const targetH = offscreen.height * 0.95;
+    const targetW = targetH * imgAspect;
     const yPos = (offscreen.height - targetH) / 2;
 
-    // Draw Left Hand (aligned to left)
-    const aspectL = imgLeft.width / imgLeft.height;
-    const widthL = Math.min(offscreen.width * 0.46, targetH * aspectL);
-    offCtx.drawImage(imgLeft, 0, yPos, widthL, targetH);
+    // Draw Left Hand (aligned to left edge)
+    offCtx.save();
+    offCtx.drawImage(imgHand, 0, yPos, targetW, targetH);
+    offCtx.restore();
 
-    // Draw Right Hand (aligned to right)
-    const aspectR = imgRight.width / imgRight.height;
-    const widthR = Math.min(offscreen.width * 0.46, targetH * aspectR);
-    offCtx.drawImage(imgRight, offscreen.width - widthR, yPos, widthR, targetH);
+    // Draw Right Hand (mirrored horizontally, aligned to right edge)
+    offCtx.save();
+    offCtx.translate(offscreen.width, 0);
+    offCtx.scale(-1, 1);
+    offCtx.drawImage(imgHand, 0, yPos, targetW, targetH);
+    offCtx.restore();
   }
 
   function buildGrid() {
     grid = [];
-    if (!leftLoaded || !rightLoaded) return;
+    if (!handLoaded) return;
 
     const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
 
@@ -955,10 +952,10 @@ function initAsciiHands() {
         const blue = imgData[idx + 2];
         const alpha = imgData[idx + 3] / 255;
 
-        // Calculate luminance / brightness
+        // Luminance calculation
         const brightness = ((red * 0.299 + green * 0.587 + blue * 0.114) / 255) * alpha;
 
-        if (brightness > 0.08) {
+        if (brightness > 0.05) {
           const charIndex = Math.min(
             charSet.length - 1,
             Math.floor(brightness * (charSet.length - 1))
@@ -996,12 +993,11 @@ function initAsciiHands() {
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
     const baseColorRGB = isLight ? '0, 0, 0' : '255, 255, 255';
 
-    const hoverRadius = 90;
+    const hoverRadius = 100;
 
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      // Mouse distance
       const dx = mouseX - p.cx;
       const dy = mouseY - p.cy;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -1028,7 +1024,7 @@ function initAsciiHands() {
       if (p.highlight > 0.2) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.42})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.45})`;
       }
 
       ctx.fillText(p.currentChar, p.cx, p.cy);
@@ -1038,7 +1034,7 @@ function initAsciiHands() {
   }
 
   window.addEventListener('resize', resize);
-  if (leftLoaded && rightLoaded) resize();
+  if (handLoaded) resize();
   requestAnimationFrame(render);
 }
 
