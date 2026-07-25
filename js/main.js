@@ -957,9 +957,8 @@ function initAsciiHands() {
         }
       }
 
-      const alpha = p.hl > 0.1
-        ? Math.min(1, p.density * 0.75 + p.hl * 0.25)
-        : p.density * 0.55;
+      // resting state is darker gray, hover state brightens up to pure white
+      const alpha = Math.min(1, (p.density * 0.20) + (p.hl * 0.8));
 
       ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
       ctx.fillText(p.currentChar, p.x, p.y);
