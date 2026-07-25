@@ -783,8 +783,8 @@ function initAsciiHands() {
   const CELL_W    = 10;
   const CELL_H    = 14;
   const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
-  const THRESHOLD  = 0.06;   // minimum brightness to render a char
-  const HOVER_R    = 100;    // mouse influence radius (px)
+  const THRESHOLD  = 0.02;   // minimum brightness to render a char
+  const HOVER_R    = 160;    // mouse influence radius (px)
   const CHAR_SET   = ['.', ':', ';', '-', '=', '+', 'x', '#', '%', '@', '$'];
   const SCRAMBLE   = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
 
@@ -942,7 +942,7 @@ function initAsciiHands() {
         const f = 1 - dist / HOVER_R;
         p.hl  = Math.max(p.hl, f);
         /* faster glyph scramble near cursor */
-        if (Math.random() < f * 0.4)
+        if (Math.random() < f * 0.85)
           p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
       } else {
         p.hl *= 0.88;
