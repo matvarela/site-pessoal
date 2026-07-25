@@ -880,9 +880,9 @@ function initAsciiHands() {
   let mouseX = -1000;
   let mouseY = -1000;
 
-  // Load exact GoodFella hands asset
+  // Load exact Michelangelo Creation of Adam hands artwork image
   const imgHand = new Image();
-  imgHand.src = 'assets/goodfella_hand.png';
+  imgHand.src = 'assets/adam_hands_michelangelo.png';
   let handLoaded = false;
 
   imgHand.onload = () => {
@@ -899,8 +899,8 @@ function initAsciiHands() {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 2.4);
-    offscreen.height = Math.floor(height / 2.4);
+    offscreen.width = Math.floor(width / 2.2);
+    offscreen.height = Math.floor(height / 2.2);
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
@@ -913,23 +913,13 @@ function initAsciiHands() {
     offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
     if (!handLoaded) return;
 
-    // Natural aspect ratio of 665x1071
+    // Draw the complete Creation of Adam hands image across the offscreen canvas
     const imgAspect = imgHand.width / imgHand.height;
-    const targetH = offscreen.height * 0.95;
-    const targetW = targetH * imgAspect;
+    const targetW = offscreen.width;
+    const targetH = targetW / imgAspect;
     const yPos = (offscreen.height - targetH) / 2;
 
-    // Draw Left Hand (aligned to left edge)
-    offCtx.save();
     offCtx.drawImage(imgHand, 0, yPos, targetW, targetH);
-    offCtx.restore();
-
-    // Draw Right Hand (mirrored horizontally, aligned to right edge)
-    offCtx.save();
-    offCtx.translate(offscreen.width, 0);
-    offCtx.scale(-1, 1);
-    offCtx.drawImage(imgHand, 0, yPos, targetW, targetH);
-    offCtx.restore();
   }
 
   function buildGrid() {
