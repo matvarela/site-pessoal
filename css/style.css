@@ -1248,7 +1248,7 @@ button:focus-visible {
   left: 50%;
   margin-left: -50vw;
   margin-top: 24px;
-  height: clamp(260px, 34vw, 500px);
+  height: clamp(320px, 45vw, 650px);
   overflow: hidden;
   background: #000;
   user-select: none;

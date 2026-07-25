@@ -780,8 +780,8 @@ function initAsciiHands() {
   const ctx = canvas.getContext('2d');
 
   /* --- Config --- */
-  const CELL_W    = 7;
-  const CELL_H    = 10;
+  const CELL_W    = 10;
+  const CELL_H    = 14;
   const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
   const THRESHOLD  = 0.06;   // minimum brightness to render a char
   const HOVER_R    = 100;    // mouse influence radius (px)
@@ -926,7 +926,7 @@ function initAsciiHands() {
     rafId = requestAnimationFrame(render);
     ctx.clearRect(0, 0, W, H);
 
-    ctx.font = '8px "JetBrains Mono", monospace';
+    ctx.font = '12px "JetBrains Mono", monospace';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     t += 0.002;
@@ -957,10 +957,13 @@ function initAsciiHands() {
         }
       }
 
-      // resting state is darker gray, hover state brightens up to pure white
+      // resting state is darker gray, hover state brightens up to bright blue
+      const r_c = 255 - (p.hl * 195); // 255 -> 60
+      const g_c = 255 - (p.hl * 95);  // 255 -> 160
+      const b_c = 255;                // 255 -> 255
       const alpha = Math.min(1, (p.density * 0.20) + (p.hl * 0.8));
 
-      ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+      ctx.fillStyle = `rgba(${r_c.toFixed(0)},${g_c.toFixed(0)},${b_c.toFixed(0)},${alpha.toFixed(3)})`;
       ctx.fillText(p.currentChar, p.x, p.y);
     }
   }
