@@ -1304,12 +1304,20 @@ button:focus-visible {
 /* ============================================================
    3D Spline Logo Background Overlay
    ============================================================ */
-#splineCanvas {
+#canvas-container {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1; /* Behind all regular site content */
-  pointer-events: none; /* Let clicks pass through to the site */
+  z-index: 10;
+  pointer-events: none;
+  background: transparent;
+}
+
+#splineCanvas {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
