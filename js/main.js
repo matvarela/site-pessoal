@@ -777,8 +777,10 @@ function initAsciiHands() {
   if (!canvas || !container) return;
 
   const ctx = canvas.getContext('2d');
-  const offscreen = document.createElement('canvas');
-  const offCtx = offscreen.getContext('2d');
+  const offLeft = document.createElement('canvas');
+  const ctxLeft = offLeft.getContext('2d');
+  const offRight = document.createElement('canvas');
+  const ctxRight = offRight.getContext('2d');
 
   const charSet = [' ', '.', ':', '-', '=', '+', '*', 'x', '#', '%', '@', '$', '8'];
   const scramblePool = ['@', '#', '%', '&', '$', '8', '0', 'X', 'Z', '?', '!', '1', '0', '+', '*', 'x', '~', ';', ':', '.', '/', '\\', '|', '[', ']'];
@@ -787,23 +789,31 @@ function initAsciiHands() {
   let height = 0;
   let cols = 0;
   let rows = 0;
-  const cellW = 6;
-  const cellH = 9;
+  const cellW = 7;
+  const cellH = 10;
   let grid = [];
 
   let mouseX = -1000;
   let mouseY = -1000;
   let startTime = Date.now();
 
-  // Load exact Michelangelo Creation of Adam hands artwork image
-  const imgHand = new Image();
-  imgHand.src = 'assets/adam_hands_michelangelo.png';
-  let handLoaded = false;
+  // Load Left (God) and Right (Adam) hand images
+  const imgLeft = new Image();
+  imgLeft.src = 'assets/hand_left_god_clean.png';
+  let leftLoaded = false;
 
-  imgHand.onload = () => {
-    handLoaded = true;
-    resize();
-  };
+  const imgRight = new Image();
+  imgRight.src = 'assets/hand_right_adam_clean.png';
+  let rightLoaded = false;
+
+  function checkLoaded() {
+    if (leftLoaded && rightLoaded) {
+      resize();
+    }
+  }
+
+  imgLeft.onload = () => { leftLoaded = true; checkLoaded(); };
+  imgRight.onload = () => { rightLoaded = true; checkLoaded(); };
 
   function resize() {
     const rect = container.getBoundingClientRect();
@@ -814,50 +824,77 @@ function initAsciiHands() {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 1.5);
-    offscreen.height = Math.floor(height / 1.5);
+    const offW = Math.floor(width / 1.5);
+    const offH = Math.floor(height / 1.5);
+
+    offLeft.width = offW;
+    offLeft.height = offH;
+    offRight.width = offW;
+    offRight.height = offH;
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
 
-    drawAdamHandsImage();
-    buildGrid();
+    drawHandOffscreens(offW, offH);
+    buildGrid(offW, offH);
   }
 
-  function drawAdamHandsImage() {
-    offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-    if (!handLoaded) return;
+  function drawHandOffscreens(offW, offH) {
+    ctxLeft.clearRect(0, 0, offW, offH);
+    ctxRight.clearRect(0, 0, offW, offH);
 
-    // Draw the complete Creation of Adam hands image across the offscreen canvas
-    const imgAspect = imgHand.width / imgHand.height;
-    const targetW = offscreen.width;
-    const targetH = targetW / imgAspect;
-    const yPos = (offscreen.height - targetH) / 2;
+    if (!leftLoaded || !rightLoaded) return;
 
-    offCtx.drawImage(imgHand, 0, yPos, targetW, targetH);
+    // Left hand occupies ~36% of width on far left
+    const handWidthL = offW * 0.36;
+    const aspectL = imgLeft.width / imgLeft.height;
+    const handHeightL = handWidthL / aspectL;
+    const yL = offH - handHeightL;
+
+    ctxLeft.drawImage(imgLeft, 0, yL, handWidthL, handHeightL);
+
+    // Right hand occupies ~36% of width on far right
+    const handWidthR = offW * 0.36;
+    const aspectR = imgRight.width / imgRight.height;
+    const handHeightR = handWidthR / aspectR;
+    const yR = offH - handHeightR;
+
+    ctxRight.drawImage(imgRight, offW - handWidthR, yR, handWidthR, handHeightR);
   }
 
-  function buildGrid() {
+  function buildGrid(offW, offH) {
     grid = [];
-    if (!handLoaded) return;
+    if (!leftLoaded || !rightLoaded) return;
 
-    const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+    const dataL = ctxLeft.getImageData(0, 0, offW, offH).data;
+    const dataR = ctxRight.getImageData(0, 0, offW, offH).data;
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const cx = (c + 0.5) * cellW;
         const cy = (r + 0.5) * cellH;
 
-        const offX = Math.floor((cx / width) * offscreen.width);
-        const offY = Math.floor((cy / height) * offscreen.height);
-        const idx = (offY * offscreen.width + offX) * 4;
+        // 1. Disposição: Terço central (35% a 65%) inteiramente limpo e livre de caracteres (#000000)
+        const normX = cx / width;
+        if (normX > 0.35 && normX < 0.65) continue;
 
-        const red = imgData[idx];
-        const green = imgData[idx + 1];
-        const blue = imgData[idx + 2];
-        const alpha = imgData[idx + 3] / 255;
+        const offX = Math.floor(normX * offW);
+        const offY = Math.floor((cy / height) * offH);
+        const idx = (offY * offW + offX) * 4;
 
-        // Luminance calculation
+        let red = 0, green = 0, blue = 0, alpha = 0;
+        if (normX <= 0.35) {
+          red = dataL[idx];
+          green = dataL[idx + 1];
+          blue = dataL[idx + 2];
+          alpha = dataL[idx + 3] / 255;
+        } else {
+          red = dataR[idx];
+          green = dataR[idx + 1];
+          blue = dataR[idx + 2];
+          alpha = dataR[idx + 3] / 255;
+        }
+
         const brightness = ((red * 0.299 + green * 0.587 + blue * 0.114) / 255) * alpha;
 
         if (brightness > 0.04) {
@@ -882,6 +919,7 @@ function initAsciiHands() {
     }
   }
 
+  // Tracking mouse on container smoothly
   container.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
@@ -902,7 +940,7 @@ function initAsciiHands() {
 
     const baseColorRGB = '255, 255, 255';
 
-    const hoverRadius = 120;
+    const hoverRadius = 110;
     const springK = 0.08;
     const damping = 0.82;
     const elapsedTime = (Date.now() - startTime);
@@ -910,19 +948,19 @@ function initAsciiHands() {
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      // 1. Mouse Proximity Physics (Interactive Displacement Campo de Força)
+      // 3. Interatividade por Proximidade (Displacement Field com Spring Physics)
       const dx = p.x - mouseX;
       const dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < hoverRadius && dist > 0) {
         const factor = 1 - dist / hoverRadius;
-        const pushForce = factor * factor * 14;
+        const pushForce = factor * factor * 13;
         p.vx += (dx / dist) * pushForce;
         p.vy += (dy / dist) * pushForce;
         p.highlight = Math.max(p.highlight, factor);
 
-        // Glyph Scramble on hover
+        // Mutação acelerada no raio do cursor
         if (Math.random() < factor * 0.45) {
           p.currentChar = scramblePool[Math.floor(Math.random() * scramblePool.length)];
         }
@@ -930,7 +968,7 @@ function initAsciiHands() {
         p.highlight *= 0.92;
         if (p.highlight < 0.02) {
           p.highlight = 0;
-          // Slow organic glyph scramble (mutation over time)
+          // 4. Mutação lenta dos caracteres (Perlin / Organic Noise)
           if (Math.random() < 0.008) {
             p.currentChar = scramblePool[Math.floor(Math.random() * scramblePool.length)];
           } else if (Math.random() < 0.04) {
@@ -939,7 +977,7 @@ function initAsciiHands() {
         }
       }
 
-      // 2. Spring return physics towards baseX/baseY
+      // Retorno elástico de mola para a matriz original
       const rx = p.baseX - p.x;
       const ry = p.baseY - p.y;
       p.vx = (p.vx + rx * springK) * damping;
@@ -947,19 +985,19 @@ function initAsciiHands() {
       p.x += p.vx;
       p.y += p.vy;
 
-      // 3. Organic floating motion (wave noise)
-      const waveX = Math.cos(elapsedTime * 0.0012 + p.baseY * 0.015) * 1.5;
-      const waveY = Math.sin(elapsedTime * 0.0015 + p.baseX * 0.012) * 2.2;
+      // Flutuação orgânica do ruído
+      const waveX = Math.cos(elapsedTime * 0.0012 + p.baseY * 0.015) * 1.4;
+      const waveY = Math.sin(elapsedTime * 0.0015 + p.baseX * 0.012) * 2.0;
 
       const drawX = p.x + waveX;
       const drawY = p.y + waveY;
 
-      // 4. Color & Opacity (high-contrast white/gray on pure black)
-      const opacity = Math.min(1, p.density * 0.7 + p.highlight * 0.3);
+      // Renderização ASCII monocromática de alto contraste (#000000 / #FFFFFF)
+      const opacity = Math.min(1, p.density * 0.75 + p.highlight * 0.25);
       if (p.highlight > 0.15) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.5})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.52})`;
       }
 
       ctx.fillText(p.currentChar, drawX, drawY);
@@ -969,7 +1007,7 @@ function initAsciiHands() {
   }
 
   window.addEventListener('resize', resize);
-  if (handLoaded) resize();
+  if (leftLoaded && rightLoaded) resize();
   requestAnimationFrame(render);
 }
 

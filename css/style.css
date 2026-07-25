@@ -1241,10 +1241,10 @@ button:focus-visible {
 .ascii-hands-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 460px;
-  min-height: 300px;
-  margin: 40px 0 20px 0;
+  aspect-ratio: 16 / 7;
+  max-height: 420px;
+  min-height: 280px;
+  margin: 20px 0 0 0;
   overflow: hidden;
   display: flex;
   align-items: center;
