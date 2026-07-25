@@ -980,13 +980,37 @@ function initAsciiHands() {
     }
   }
 
-  /* --- Mouse tracking --- */
+  /* --- Mouse tracking & Parallax --- */
+  const parallaxTargets = wrapper.querySelectorAll('.god-hand-side, #asciiHandsCanvas');
+
   wrapper.addEventListener('mousemove', e => {
     const r = canvas.getBoundingClientRect();
     mouseX = e.clientX - r.left;
     mouseY = e.clientY - r.top;
+
+    // Parallax effect: subtle movement opposite to cursor
+    const centerX = r.width / 2;
+    const centerY = r.height / 2;
+    const moveX = ((mouseX - centerX) / centerX) * -16;
+    const moveY = ((mouseY - centerY) / centerY) * -16;
+
+    gsap.to(parallaxTargets, {
+      x: moveX,
+      y: moveY,
+      duration: 0.6,
+      ease: 'power2.out'
+    });
   });
-  wrapper.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+  wrapper.addEventListener('mouseleave', () => { 
+    mouseX = -9999; mouseY = -9999; 
+    gsap.to(parallaxTargets, {
+      x: 0,
+      y: 0,
+      duration: 1.0,
+      ease: 'power3.out'
+    });
+  });
 
   /* --- Resize (debounced) --- */
   let resizeTimer;
