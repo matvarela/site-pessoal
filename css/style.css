@@ -1236,11 +1236,17 @@ button:focus-visible {
 
 
 /* ============================================================
-   RODAPÉ GOD HAND IMAGE
+   RODAPÉ GOD HAND IMAGE (FULL BLEED DE PONTA A PONTA)
    ============================================================ */
 .god-hand-container {
-  width: 100%;
-  margin: 20px 0 32px 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: 24px;
+  margin-bottom: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1251,8 +1257,6 @@ button:focus-visible {
 .god-hand-img {
   width: 100%;
   height: auto;
-  max-height: 440px;
-  object-fit: contain;
   display: block;
 }
 
