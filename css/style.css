@@ -1236,8 +1236,16 @@ button:focus-visible {
 
 
 /* ============================================================
-   RODAPÉ GOD HAND IMAGE (FULL BLEED DE PONTA A PONTA)
+   RODAPÉ GOD HAND IMAGE (FULL BLEED + TEXTO SOBREPOSTO)
    ============================================================ */
+
+/* Wrapper: contexto de empilhamento para imagem + texto sobreposto */
+.god-hand-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Imagem full-bleed de ponta a ponta */
 .god-hand-container {
   width: 100vw;
   position: relative;
@@ -1246,7 +1254,7 @@ button:focus-visible {
   margin-left: -50vw;
   margin-right: -50vw;
   margin-top: 24px;
-  margin-bottom: 40px;
+  margin-bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1258,6 +1266,19 @@ button:focus-visible {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* Texto "Olá! Vamos falar" sobreposto — ancorado na parte inferior da imagem */
+.god-hand-wrapper .contact-headline {
+  position: absolute;
+  bottom: 6%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 2;
+  pointer-events: auto;
+  /* garante que o texto não quebre o full-bleed horizontal */
+  padding: 0 clamp(16px, 4vw, 80px);
 }
 
 
