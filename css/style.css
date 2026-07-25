@@ -1236,30 +1236,24 @@ button:focus-visible {
 
 
 /* ============================================================
-   ASCII CREATION OF ADAM HANDS (FOOTER)
+   RODAPÉ GOD HAND IMAGE
    ============================================================ */
-.ascii-hands-container {
-  position: relative;
+.god-hand-container {
   width: 100%;
-  aspect-ratio: 16 / 7;
-  max-height: 420px;
-  min-height: 280px;
-  margin: 16px 0 24px 0;
-  overflow: hidden;
+  margin: 20px 0 32px 0;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: #000000;
+  align-items: center;
+  overflow: hidden;
   user-select: none;
 }
 
-#asciiHandsCanvas {
-  display: block;
+.god-hand-img {
   width: 100%;
-  height: 100%;
-  background: #000000;
-  pointer-events: auto;
-  cursor: default;
+  height: auto;
+  max-height: 440px;
+  object-fit: contain;
+  display: block;
 }
 
 
