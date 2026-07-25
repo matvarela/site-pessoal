@@ -766,7 +766,7 @@ function runPreloader() {
     onComplete: () => {
       if (percentEl) percentEl.textContent = '100%';
       gsap.delayedCall(0.12, exit);
-    }\r
+    }
   });
 }
 
