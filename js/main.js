@@ -718,104 +718,18 @@ function runPreloader() {
       return;
     }
 
-    hidePercent();
-    if (logoEl) logoEl.style.opacity = '0';
-    gsap.set(preloader, { pointerEvents: 'none' });
+    flyLogoToNav((ok) => {
+      /* Ao pousar a logo: hero entra junto com o fade do preto */
+      revealHero(ok);
 
-    gsap.to(preloader, {
-      opacity: 0,
-      duration: 0.55,
-      ease: 'power2.out',
-      onComplete: () => {
-        dismissPreloader();
-        showIntroPlayer();
-      }
-    });
-  }
-
-  function showIntroPlayer() {
-    const container = document.getElementById('introVideoContainer');
-    const playerScreen = document.getElementById('introPlayerScreen');
-    const videoWrapper = document.getElementById('introVideoWrapper');
-    const video = document.getElementById('introVideo');
-    const playBtn = document.getElementById('introPlayBtn');
-    const skipBtn = document.getElementById('introSkipBtn');
-    const videoSkipBtn = document.getElementById('introVideoSkip');
-
-    if (!container || !playerScreen || !video) {
-      revealHero(false);
-      return;
-    }
-
-    // Show container
-    container.style.display = 'block';
-    if (typeof gsap !== 'undefined') {
-      gsap.to(container, { opacity: 1, duration: 0.4, ease: 'power2.out', onComplete: () => {
-        playerScreen.classList.add('visible');
-      }});
-    } else {
-      container.style.opacity = '1';
-      playerScreen.classList.add('visible');
-    }
-
-    let isFinishing = false;
-    function finishIntro() {
-      if (isFinishing) return;
-      isFinishing = true;
-
-      // Start revealing hero immediately so it cross-fades behind the fading container
-      revealHero(false);
-
-      if (typeof gsap !== 'undefined') {
-        gsap.to(container, {
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.inOut',
-          onComplete: () => {
-            container.style.display = 'none';
-            if (video) video.pause();
-          }
-        });
-      } else {
-        container.style.display = 'none';
-        if (video) video.pause();
-      }
-    }
-
-    // Skip button (player screen)
-    if (skipBtn) {
-      skipBtn.addEventListener('click', finishIntro);
-    }
-
-    // Play button
-    if (playBtn) {
-      playBtn.addEventListener('click', () => {
-        // Transition from player screen to video
-        playerScreen.classList.remove('visible');
-        setTimeout(() => {
-          videoWrapper.style.display = 'block';
-          requestAnimationFrame(() => {
-            videoWrapper.classList.add('visible');
-            video.play().catch(() => finishIntro());
-          });
-        }, 300);
+      gsap.set(preloader, { pointerEvents: 'none' });
+      gsap.to(preloader, {
+        opacity: 0,
+        duration: 0.55,
+        ease: 'power2.out',
+        onComplete: dismissPreloader
       });
-    }
-
-    // Skip during video
-    if (videoSkipBtn) {
-      videoSkipBtn.addEventListener('click', finishIntro);
-    }
-
-    // Pre-trigger cross-fade 0.7s before video ends for ultra fluid transition
-    video.addEventListener('timeupdate', () => {
-      if (video.duration && (video.duration - video.currentTime <= 0.7)) {
-        finishIntro();
-      }
     });
-
-    // Fallback if ended triggers first
-    video.addEventListener('ended', finishIntro);
   }
 
 
