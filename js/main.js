@@ -873,22 +873,30 @@ function initAsciiHands() {
   let height = 0;
   let cols = 0;
   let rows = 0;
-  const cellW = 10;
-  const cellH = 14;
+  const cellW = 8;
+  const cellH = 12;
   let grid = [];
 
   let mouseX = -1000;
   let mouseY = -1000;
 
-  // Load the actual Michelangelo Creation of Adam hands image
-  const img = new Image();
-  img.src = 'assets/adam_hands.png';
-  let imgLoaded = false;
+  // Load individual left and right hand images
+  const imgLeft = new Image();
+  imgLeft.src = 'assets/hand_left_clean.png';
+  let leftLoaded = false;
 
-  img.onload = () => {
-    imgLoaded = true;
-    resize();
-  };
+  const imgRight = new Image();
+  imgRight.src = 'assets/hand_right_clean.png';
+  let rightLoaded = false;
+
+  function checkLoaded() {
+    if (leftLoaded && rightLoaded) {
+      resize();
+    }
+  }
+
+  imgLeft.onload = () => { leftLoaded = true; checkLoaded(); };
+  imgRight.onload = () => { rightLoaded = true; checkLoaded(); };
 
   function resize() {
     const rect = container.getBoundingClientRect();
@@ -899,8 +907,8 @@ function initAsciiHands() {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 3.5);
-    offscreen.height = Math.floor(height / 3.5);
+    offscreen.width = Math.floor(width / 2.5);
+    offscreen.height = Math.floor(height / 2.5);
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
@@ -911,15 +919,25 @@ function initAsciiHands() {
 
   function drawAdamHandsImage() {
     offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-    if (imgLoaded) {
-      // Draw image to fit offscreen width & height while maintaining proportions
-      offCtx.drawImage(img, 0, 0, offscreen.width, offscreen.height);
-    }
+    if (!leftLoaded || !rightLoaded) return;
+
+    const targetH = offscreen.height * 0.72;
+    const yPos = (offscreen.height - targetH) / 2;
+
+    // Draw Left Hand (aligned to left)
+    const aspectL = imgLeft.width / imgLeft.height;
+    const widthL = Math.min(offscreen.width * 0.46, targetH * aspectL);
+    offCtx.drawImage(imgLeft, 0, yPos, widthL, targetH);
+
+    // Draw Right Hand (aligned to right)
+    const aspectR = imgRight.width / imgRight.height;
+    const widthR = Math.min(offscreen.width * 0.46, targetH * aspectR);
+    offCtx.drawImage(imgRight, offscreen.width - widthR, yPos, widthR, targetH);
   }
 
   function buildGrid() {
     grid = [];
-    if (!imgLoaded) return;
+    if (!leftLoaded || !rightLoaded) return;
 
     const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
 
@@ -971,7 +989,7 @@ function initAsciiHands() {
 
   function render() {
     ctx.clearRect(0, 0, width, height);
-    ctx.font = '11px "JetBrains Mono", "Space Grotesk", monospace';
+    ctx.font = '10px "JetBrains Mono", "Space Grotesk", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -1006,11 +1024,11 @@ function initAsciiHands() {
         }
       }
 
-      const opacity = Math.min(1, p.density * 0.6 + p.highlight * 0.4);
+      const opacity = Math.min(1, p.density * 0.65 + p.highlight * 0.35);
       if (p.highlight > 0.2) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.45})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.42})`;
       }
 
       ctx.fillText(p.currentChar, p.cx, p.cy);
@@ -1020,7 +1038,7 @@ function initAsciiHands() {
   }
 
   window.addEventListener('resize', resize);
-  if (imgLoaded) resize();
+  if (leftLoaded && rightLoaded) resize();
   requestAnimationFrame(render);
 }
 
