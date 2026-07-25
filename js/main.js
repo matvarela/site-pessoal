@@ -766,8 +766,245 @@ function runPreloader() {
     onComplete: () => {
       if (percentEl) percentEl.textContent = '100%';
       gsap.delayedCall(0.12, exit);
-    }
+    }\r
   });
+}
+
+/* ---- ASCII Hands Footer ---- */
+function initAsciiHands() {
+  const canvas = document.getElementById('asciiHandsCanvas');
+  if (!canvas) return;
+  const wrapper = canvas.closest('.god-hand-wrapper');
+  if (!wrapper) return;
+
+  const ctx = canvas.getContext('2d');
+
+  /* --- Config --- */
+  const CELL_W    = 7;
+  const CELL_H    = 10;
+  const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
+  const THRESHOLD  = 0.06;   // minimum brightness to render a char
+  const HOVER_R    = 100;    // mouse influence radius (px)
+  const SPRING_K   = 0.08;
+  const DAMPING    = 0.82;
+  const PUSH_STR   = 12;
+  const CHAR_SET   = ['.', ':', ';', '-', '=', '+', 'x', '#', '%', '@', '$'];
+  const SCRAMBLE   = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
+
+  /* --- Perlin Noise (simple 2D, no lib) --- */
+  const _pArr = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) _pArr[i] = i;
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = _pArr[i]; _pArr[i] = _pArr[j]; _pArr[j] = tmp;
+  }
+  const perm = new Uint8Array(512);
+  for (let i = 0; i < 512; i++) perm[i] = _pArr[i & 255];
+
+  function fade(t)        { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(a, b, t)  { return a + t * (b - a); }
+  function grad(h, x, y)  {
+    h &= 3;
+    const u = h < 2 ? x : y;
+    const v = h < 2 ? y : x;
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+  }
+  function noise(x, y) {
+    const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+    x -= Math.floor(x); y -= Math.floor(y);
+    const u = fade(x), v = fade(y);
+    const a = perm[X] + Y, b = perm[X + 1] + Y;
+    return lerp(
+      lerp(grad(perm[a],     x,     y),   grad(perm[b],     x - 1, y),   u),
+      lerp(grad(perm[a + 1], x,     y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v
+    );
+  }
+
+  /* --- State --- */
+  let W = 0, H = 0, sideW = 0;
+  let grid = [];
+  let mouseX = -9999, mouseY = -9999;
+  let t = 0;
+  let rafId = null;
+
+  /* --- Image loading --- */
+  const imgL = new Image(), imgR = new Image();
+  imgL.src = 'assets/god-hand-rodape-left.png';
+  imgR.src = 'assets/god-hand-rodape-right.png';
+  let okL = false, okR = false;
+  imgL.onload = () => { okL = true; if (okR) build(); };
+  imgR.onload = () => { okR = true; if (okL) build(); };
+
+  /* Sample an image to an offscreen canvas and return pixel data */
+  function sampleImg(img, w, h) {
+    const off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    const oc = off.getContext('2d');
+    oc.drawImage(img, 0, 0, w, h);
+    return oc.getImageData(0, 0, w, h).data;
+  }
+
+  function build() {
+    const rect = wrapper.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    sideW = W * SIDE_RATIO;
+
+    /* Resize canvas respecting DPR */
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* Compute displayed image sizes: height fills wrapper, width auto */
+    const aspL  = imgL.naturalWidth / imgL.naturalHeight;
+    const dispLW = Math.round(H * aspL),  dispLH = H;
+
+    const aspR  = imgR.naturalWidth / imgR.naturalHeight;
+    const dispRW = Math.round(H * aspR), dispRH = H;
+
+    /* Sample at capped resolution to avoid slow getImageData on huge images */
+    const maxPx = 800;
+    const scL = Math.min(1, maxPx / dispLW);
+    const sLW = Math.round(dispLW * scL), sLH = Math.round(dispLH * scL);
+    const dataL = sampleImg(imgL, sLW, sLH);
+
+    const scR = Math.min(1, maxPx / dispRW);
+    const sRW = Math.round(dispRW * scR), sRH = Math.round(dispRH * scR);
+    const dataR = sampleImg(imgR, sRW, sRH);
+
+    /* Right image left-edge in canvas coords */
+    const rImgX0 = W - dispRW;
+
+    grid = [];
+    const cols = Math.floor(W / CELL_W);
+    const rows = Math.floor(H / CELL_H);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx = (c + 0.5) * CELL_W;
+        const cy = (r + 0.5) * CELL_H;
+
+        let brightness = 0;
+
+        if (cx < sideW) {
+          /* Left zone — image anchored at x=0 */
+          const ix = Math.round((cx / dispLW) * sLW);
+          const iy = Math.round((cy / dispLH) * sLH);
+          if (ix >= 0 && ix < sLW && iy >= 0 && iy < sLH) {
+            const k = (iy * sLW + ix) * 4;
+            brightness = (dataL[k] * 0.299 + dataL[k+1] * 0.587 + dataL[k+2] * 0.114) / 255;
+          }
+        } else if (cx > W - sideW) {
+          /* Right zone — image anchored at right edge */
+          const ix = Math.round(((cx - rImgX0) / dispRW) * sRW);
+          const iy = Math.round((cy / dispRH) * sRH);
+          if (ix >= 0 && ix < sRW && iy >= 0 && iy < sRH) {
+            const k = (iy * sRW + ix) * 4;
+            brightness = (dataR[k] * 0.299 + dataR[k+1] * 0.587 + dataR[k+2] * 0.114) / 255;
+          }
+        } else {
+          continue; /* center zone: skip — stays black */
+        }
+
+        if (brightness > THRESHOLD) {
+          const ci = Math.min(CHAR_SET.length - 1, Math.floor(brightness * (CHAR_SET.length - 1)));
+          grid.push({
+            baseX: cx, baseY: cy,
+            x: cx,     y: cy,
+            vx: 0,     vy: 0,
+            density: brightness,
+            baseChar:    CHAR_SET[ci],
+            currentChar: CHAR_SET[ci],
+            hl: 0
+          });
+        }
+      }
+    }
+  }
+
+  /* --- Render loop --- */
+  function render() {
+    rafId = requestAnimationFrame(render);
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.font = '8px "JetBrains Mono", monospace';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    t += 0.002;
+
+    for (let i = 0; i < grid.length; i++) {
+      const p = grid[i];
+
+      /* Mouse repulsion (spring physics) */
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < HOVER_R && dist > 0) {
+        const f = 1 - dist / HOVER_R;
+        p.vx += (dx / dist) * f * f * PUSH_STR;
+        p.vy += (dy / dist) * f * f * PUSH_STR;
+        p.hl  = Math.max(p.hl, f);
+        /* faster glyph scramble near cursor */
+        if (Math.random() < f * 0.4)
+          p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
+      } else {
+        p.hl *= 0.88;
+        if (p.hl < 0.02) {
+          p.hl = 0;
+          /* Perlin-driven slow organic mutation */
+          const n = noise(p.baseX * 0.014 + t, p.baseY * 0.014 + t * 0.6);
+          if (n > 0.32)
+            p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
+          else if (Math.random() < 0.025)
+            p.currentChar = p.baseChar;
+        }
+      }
+
+      /* Spring return to base position */
+      p.vx = (p.vx + (p.baseX - p.x) * SPRING_K) * DAMPING;
+      p.vy = (p.vy + (p.baseY - p.y) * SPRING_K) * DAMPING;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      /* Subtle organic float via sine */
+      const wave = Math.sin(t * 0.9 + p.baseX * 0.011 + p.baseY * 0.009) * 1.3;
+
+      const alpha = p.hl > 0.1
+        ? Math.min(1, p.density * 0.75 + p.hl * 0.25)
+        : p.density * 0.55;
+
+      ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+      ctx.fillText(p.currentChar, p.x, p.y + wave);
+    }
+  }
+
+  /* --- Mouse tracking --- */
+  wrapper.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = e.clientX - r.left;
+    mouseY = e.clientY - r.top;
+  });
+  wrapper.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+  /* --- Resize (debounced) --- */
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (okL && okR) {
+        grid = [];
+        if (rafId) cancelAnimationFrame(rafId);
+        build();
+        rafId = requestAnimationFrame(render);
+      }
+    }, 150);
+  });
+
+  /* Start */
+  if (okL && okR) build();
+  rafId = requestAnimationFrame(render);
 }
 
 /* ---- Init ---- */
@@ -783,6 +1020,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initNavbar();
   initCopyEmail();
+  initAsciiHands();
   runPreloader();
 });
-
