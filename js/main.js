@@ -880,6 +880,16 @@ function initAsciiHands() {
   let mouseX = -1000;
   let mouseY = -1000;
 
+  // Load the actual Michelangelo Creation of Adam hands image
+  const img = new Image();
+  img.src = 'assets/adam_hands.png';
+  let imgLoaded = false;
+
+  img.onload = () => {
+    imgLoaded = true;
+    resize();
+  };
+
   function resize() {
     const rect = container.getBoundingClientRect();
     width = rect.width || 1000;
@@ -889,52 +899,28 @@ function initAsciiHands() {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    offscreen.width = Math.floor(width / 3);
-    offscreen.height = Math.floor(height / 3);
+    offscreen.width = Math.floor(width / 3.5);
+    offscreen.height = Math.floor(height / 3.5);
 
     cols = Math.floor(width / cellW);
     rows = Math.floor(height / cellH);
 
-    drawAdamHands(offCtx, offscreen.width, offscreen.height);
+    drawAdamHandsImage();
     buildGrid();
   }
 
-  function drawAdamHands(oCtx, w, h) {
-    oCtx.clearRect(0, 0, w, h);
-    oCtx.fillStyle = '#ffffff';
-    const cy = h * 0.48;
-    const gapCenter = w * 0.48;
-
-    // Left Hand (God's hand reaching right)
-    oCtx.beginPath();
-    oCtx.moveTo(0, h * 0.28);
-    oCtx.bezierCurveTo(w * 0.1, h * 0.30, w * 0.18, h * 0.36, w * 0.25, h * 0.40);
-    oCtx.bezierCurveTo(w * 0.28, h * 0.32, w * 0.30, h * 0.26, w * 0.32, h * 0.30); // Thumb top
-    oCtx.bezierCurveTo(w * 0.31, h * 0.38, w * 0.33, h * 0.42, w * 0.40, h * 0.44); // Index top
-    oCtx.bezierCurveTo(w * 0.44, h * 0.45, gapCenter - 15, cy - 2, gapCenter - 6, cy); // Index tip
-    oCtx.bezierCurveTo(gapCenter - 14, cy + 5, w * 0.38, h * 0.50, w * 0.34, h * 0.52); // Index bottom
-    oCtx.bezierCurveTo(w * 0.36, h * 0.55, w * 0.34, h * 0.62, w * 0.30, h * 0.64); // Knuckles
-    oCtx.bezierCurveTo(w * 0.26, h * 0.66, w * 0.22, h * 0.65, w * 0.18, h * 0.60);
-    oCtx.bezierCurveTo(w * 0.12, h * 0.58, w * 0.05, h * 0.65, 0, h * 0.70);
-    oCtx.closePath();
-    oCtx.fill();
-
-    // Right Hand (Adam's hand reaching left)
-    oCtx.beginPath();
-    oCtx.moveTo(w, h * 0.75);
-    oCtx.bezierCurveTo(w * 0.90, h * 0.70, w * 0.80, h * 0.62, w * 0.72, h * 0.58);
-    oCtx.bezierCurveTo(w * 0.68, h * 0.64, w * 0.62, h * 0.66, w * 0.58, h * 0.62);
-    oCtx.bezierCurveTo(w * 0.55, h * 0.60, w * 0.53, h * 0.55, w * 0.52, h * 0.53); // Folded fingers
-    oCtx.bezierCurveTo(w * 0.51, h * 0.51, gapCenter + 14, cy + 4, gapCenter + 6, cy + 2); // Index tip
-    oCtx.bezierCurveTo(gapCenter + 14, cy - 4, w * 0.56, h * 0.42, w * 0.62, h * 0.42); // Index top
-    oCtx.bezierCurveTo(w * 0.64, h * 0.36, w * 0.68, h * 0.38, w * 0.72, h * 0.44); // Thumb
-    oCtx.bezierCurveTo(w * 0.78, h * 0.40, w * 0.88, h * 0.32, w, h * 0.28);
-    oCtx.closePath();
-    oCtx.fill();
+  function drawAdamHandsImage() {
+    offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
+    if (imgLoaded) {
+      // Draw image to fit offscreen width & height while maintaining proportions
+      offCtx.drawImage(img, 0, 0, offscreen.width, offscreen.height);
+    }
   }
 
   function buildGrid() {
     grid = [];
+    if (!imgLoaded) return;
+
     const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
 
     for (let r = 0; r < rows; r++) {
@@ -945,17 +931,24 @@ function initAsciiHands() {
         const offX = Math.floor((cx / width) * offscreen.width);
         const offY = Math.floor((cy / height) * offscreen.height);
         const idx = (offY * offscreen.width + offX) * 4;
+
+        const red = imgData[idx];
+        const green = imgData[idx + 1];
+        const blue = imgData[idx + 2];
         const alpha = imgData[idx + 3] / 255;
 
-        if (alpha > 0.04) {
+        // Calculate luminance / brightness
+        const brightness = ((red * 0.299 + green * 0.587 + blue * 0.114) / 255) * alpha;
+
+        if (brightness > 0.08) {
           const charIndex = Math.min(
             charSet.length - 1,
-            Math.floor(alpha * (charSet.length - 1))
+            Math.floor(brightness * (charSet.length - 1))
           );
           grid.push({
             cx,
             cy,
-            density: alpha,
+            density: brightness,
             baseChar: charSet[charIndex] || '*',
             currentChar: charSet[charIndex] || '*',
             highlight: 0
@@ -1013,11 +1006,11 @@ function initAsciiHands() {
         }
       }
 
-      const opacity = Math.min(1, p.density * 0.5 + p.highlight * 0.5);
+      const opacity = Math.min(1, p.density * 0.6 + p.highlight * 0.4);
       if (p.highlight > 0.2) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.38})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.45})`;
       }
 
       ctx.fillText(p.currentChar, p.cx, p.cy);
@@ -1027,7 +1020,7 @@ function initAsciiHands() {
   }
 
   window.addEventListener('resize', resize);
-  resize();
+  if (imgLoaded) resize();
   requestAnimationFrame(render);
 }
 
