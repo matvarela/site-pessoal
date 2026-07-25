@@ -781,18 +781,19 @@ function initAsciiHands() {
   const offCtx = offscreen.getContext('2d');
 
   const charSet = [' ', '.', ':', '-', '=', '+', '*', 'x', '#', '%', '@', '$', '8'];
-  const scramblePool = ['.', ':', ';', '~', '=', '+', '*', 'x', 'o', '#', '%', '&', '$', '8', '0', 'X', 'Z', '<', '>', '/', '\\', '|', '[', ']'];
+  const scramblePool = ['@', '#', '%', '&', '$', '8', '0', 'X', 'Z', '?', '!', '1', '0', '+', '*', 'x', '~', ';', ':', '.', '/', '\\', '|', '[', ']'];
 
   let width = 0;
   let height = 0;
   let cols = 0;
   let rows = 0;
   const cellW = 8;
-  const cellH = 12;
+  const cellH = 11;
   let grid = [];
 
   let mouseX = -1000;
   let mouseY = -1000;
+  let startTime = Date.now();
 
   // Load exact Michelangelo Creation of Adam hands artwork image
   const imgHand = new Image();
@@ -807,7 +808,7 @@ function initAsciiHands() {
   function resize() {
     const rect = container.getBoundingClientRect();
     width = rect.width || 1000;
-    height = rect.height || 360;
+    height = rect.height || 380;
 
     canvas.width = width * window.devicePixelRatio;
     canvas.height = height * window.devicePixelRatio;
@@ -865,8 +866,12 @@ function initAsciiHands() {
             Math.floor(brightness * (charSet.length - 1))
           );
           grid.push({
-            cx,
-            cy,
+            baseX: cx,
+            baseY: cy,
+            x: cx,
+            y: cy,
+            vx: 0,
+            vy: 0,
             density: brightness,
             baseChar: charSet[charIndex] || '*',
             currentChar: charSet[charIndex] || '*',
@@ -897,41 +902,67 @@ function initAsciiHands() {
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
     const baseColorRGB = isLight ? '0, 0, 0' : '255, 255, 255';
 
-    const hoverRadius = 100;
+    const hoverRadius = 120;
+    const springK = 0.08;
+    const damping = 0.82;
+    const elapsedTime = (Date.now() - startTime);
 
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      const dx = mouseX - p.cx;
-      const dy = mouseY - p.cy;
+      // 1. Mouse Proximity Physics (Interactive Displacement Campo de Força)
+      const dx = p.x - mouseX;
+      const dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < hoverRadius) {
+      if (dist < hoverRadius && dist > 0) {
         const factor = 1 - dist / hoverRadius;
+        const pushForce = factor * factor * 14;
+        p.vx += (dx / dist) * pushForce;
+        p.vy += (dy / dist) * pushForce;
         p.highlight = Math.max(p.highlight, factor);
-        if (Math.random() < 0.35) {
+
+        // Glyph Scramble on hover
+        if (Math.random() < factor * 0.45) {
           p.currentChar = scramblePool[Math.floor(Math.random() * scramblePool.length)];
         }
       } else {
         p.highlight *= 0.92;
         if (p.highlight < 0.02) {
           p.highlight = 0;
-          if (Math.random() < 0.03) {
+          // Slow organic glyph scramble (mutation over time)
+          if (Math.random() < 0.008) {
             p.currentChar = scramblePool[Math.floor(Math.random() * scramblePool.length)];
-          } else {
+          } else if (Math.random() < 0.04) {
             p.currentChar = p.baseChar;
           }
         }
       }
 
+      // 2. Spring return physics towards baseX/baseY
+      const rx = p.baseX - p.x;
+      const ry = p.baseY - p.y;
+      p.vx = (p.vx + rx * springK) * damping;
+      p.vy = (p.vy + ry * springK) * damping;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // 3. Organic floating motion (wave noise)
+      const waveX = Math.cos(elapsedTime * 0.0012 + p.baseY * 0.015) * 1.5;
+      const waveY = Math.sin(elapsedTime * 0.0015 + p.baseX * 0.012) * 2.2;
+
+      const drawX = p.x + waveX;
+      const drawY = p.y + waveY;
+
+      // 4. Color & Opacity
       const opacity = Math.min(1, p.density * 0.65 + p.highlight * 0.35);
-      if (p.highlight > 0.2) {
+      if (p.highlight > 0.15) {
         ctx.fillStyle = `rgba(${baseColorRGB}, ${opacity})`;
       } else {
-        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.45})`;
+        ctx.fillStyle = `rgba(${baseColorRGB}, ${p.density * 0.42})`;
       }
 
-      ctx.fillText(p.currentChar, p.cx, p.cy);
+      ctx.fillText(p.currentChar, drawX, drawY);
     }
 
     requestAnimationFrame(render);
