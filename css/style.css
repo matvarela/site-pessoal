@@ -1444,6 +1444,7 @@ button:focus-visible {
 /* ============================================================
    3D Spline Logo — Container (Fixed, Floating & Interactive)
    ============================================================ */
+<<<<<<< HEAD
 #splineContainer {
   position: fixed;
   top: 0;
@@ -1497,4 +1498,22 @@ nav {
 main {
   position: relative;
   z-index: 3;
+=======
+#canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+}
+
+#splineCanvas {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  display: block;
+>>>>>>> origin/feature/spline-3d-logo
 }
