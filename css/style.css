@@ -1248,34 +1248,13 @@ button:focus-visible {
   left: 50%;
   margin-left: -50vw;
   margin-top: 24px;
-  height: clamp(320px, 45vw, 650px);
+  height: clamp(260px, 36vw, 560px);
   overflow: hidden;
   background: #000;
   user-select: none;
 }
 
-/* Side containers — clip each hand image to its 38% zone */
-.god-hand-side {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 38%;
-  overflow: hidden;
-  z-index: 0;
-}
-.god-hand-side--left  { left: 0; }
-.god-hand-side--right { right: 0; }
 
-.god-hand-side-img {
-  position: absolute;
-  bottom: 0;
-  height: 100%;
-  width: auto;
-  display: block;
-  pointer-events: none;
-}
-.god-hand-side--left  .god-hand-side-img { left: 0; }
-.god-hand-side--right .god-hand-side-img { right: 0; }
 
 /* Canvas: transparent ASCII overlay on top of images */
 #asciiHandsCanvas {
@@ -1436,40 +1415,7 @@ button:focus-visible {
    Layer 2: .contact-headline (text on top, pointer-events:auto)
    ============================================================ */
 
-.god-hand-wrapper {
-  position: relative;
-  width: 100vw;
-  left: 50%;
-  margin-left: -50vw;
-  margin-top: 24px;
-  height: clamp(320px, 45vw, 650px);
-  overflow: hidden;
-  background: #000;
-  user-select: none;
-}
 
-/* Side containers — clip each hand image to its 38% zone */
-.god-hand-side {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 38%;
-  overflow: hidden;
-  z-index: 0;
-}
-.god-hand-side--left  { left: 0; }
-.god-hand-side--right { right: 0; }
-
-.god-hand-side-img {
-  position: absolute;
-  bottom: 0;
-  height: 100%;
-  width: auto;
-  display: block;
-  pointer-events: none;
-}
-.god-hand-side--left  .god-hand-side-img { left: 0; }
-.god-hand-side--right .god-hand-side-img { right: 0; }
 
 /* Canvas: transparent ASCII overlay on top of images */
 #asciiHandsCanvas {
@@ -1496,27 +1442,59 @@ button:focus-visible {
 }
 
 /* ============================================================
-   3D Spline Logo — Container (Fixed, Background)
+   3D Spline Logo — Container (Fixed, Floating & Interactive)
    ============================================================ */
 #splineContainer {
   position: fixed;
   top: 0;
   left: 0;
-  width: 400px;
-  height: 400px;
-  z-index: 2;           /* Atrás do nav/preloader mas acima do fundo */
-  pointer-events: none; /* Não bloqueia cliques no site */
+  width: 420px;
+  height: 420px;
+  z-index: 10;          /* Acima do fundo do main, abaixo do nav (z-index: 100) */
+  pointer-events: auto; /* Permite rotação 360 interativa ao arrastar/passar o mouse */
+  cursor: grab;
+  will-change: transform;
+  opacity: 0;           /* Revela suavemente após o Spline carregar */
+  transition: opacity 0.6s ease;
+  user-select: none;
+}
+
+#splineContainer:active {
+  cursor: grabbing;
+}
+
+#splineContainer.is-loaded {
+  opacity: 1;
+}
+
+.spline-inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
-#splineContainer spline-viewer {
+#splineContainer #splineCanvas {
   width: 100%;
   height: 100%;
-  --background-color: transparent;
+  display: block;
+  background: transparent !important;
+  outline: none;
 }
 
-/* Garante que nav e main fiquem na frente */
-main, nav {
+@media (max-width: 768px) {
+  #splineContainer {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* Garante que nav fique no topo máximo */
+nav {
+  position: fixed;
+  z-index: 100;
+}
+main {
   position: relative;
   z-index: 3;
 }

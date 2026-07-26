@@ -771,6 +771,7 @@ function runPreloader() {
 }
 
 /* ---- ASCII Hands Footer ---- */
+/* ---- ASCII Hands Footer ---- */
 function initAsciiHands() {
   const canvas = document.getElementById('asciiHandsCanvas');
   if (!canvas) return;
@@ -780,15 +781,12 @@ function initAsciiHands() {
   const ctx = canvas.getContext('2d');
 
   /* --- Config --- */
-  const CELL_W    = 10;
-  const CELL_H    = 14;
-  const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
-  const THRESHOLD  = 0.02;   // minimum brightness to render a char
-  const HOVER_R    = 160;    // mouse influence radius (px)
-  const CHAR_SET   = ['.', ':', ';', '-', '=', '+', 'x', '#', '%', '@', '$'];
-  const SCRAMBLE   = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
+  const HOVER_R = 80;    // mouse influence radius (px)
+  const SCRAMBLE = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
 
-  /* --- Perlin Noise (simple 2D, no lib) --- */
+  let t = 0; // Para animação de tempo (noise) se necessário
+  
+  /* --- Perlin Noise (simple 2D, no lib) para o scramble residual suave --- */
   const _pArr = new Uint8Array(256);
   for (let i = 0; i < 256; i++) _pArr[i] = i;
   for (let i = 255; i > 0; i--) {
@@ -817,159 +815,216 @@ function initAsciiHands() {
       v
     );
   }
+  
+  const ASCII_LEFT = [
+    "                                              .:**%%%%*+::+::",
+    "                                          .*%%*+*++++%%S%%%%SS%*+.",
+    "                                     :::***+:::. ++::+*%SSSSSSS%%%%%*::",
+    "                              .:::+:+::+%%%%+:...:.+++++++%S%S%*++*%:+*%%%%%%***+.",
+    "                           :+::    ..::*%SSSSS%S%%%+:+:...::%%*+..:++:::::+*%%%%%S*.",
+    "         .::+:.     .+::::+::.::::::+SSSSSSSSSSSSS%%%%++:    :*%*:.:.+.:::::+%%%%%%S:",
+    "+++**+*+++++:::+++*+:*:.......:::+*%%SSSSSSS%%%%%%%%%%*++.      +*:..++::::....::*+%%%*+.",
+    "*++.:::.:::::.:.::.:+*::.:::::::**%%%%%%S%%S%%%%%S%S%S%*++:.    .+%+::%%%%*::.::::.:*%SSS%+:",
+    ":::++++:::::..:....:++++++::::+:*%%%%%%%%%%SSS%%SS%SSSS%**+:.     ***:%%%%%*++*...:.::**%%SSS*+",
+    ":+++++:+*+:::.::.:.:*+::.::++::+*%%%%%%%%SSSSSSSSSS%*++*%%**::.     :::%%%%%%%%+::+*%*::.%.+%%%*",
+    "*+++++++++++::::::.:+.:.:..::+*%%%%%%%%%SSSSSSSSS+.     ****++++..    :+%%%%S%%%%SSSSS*+.+...+*S%",
+    "*+*+++++*+*++++++:.:::::::+%%%S%SS%S%%%SSS%SS#%:         ::*%%S%*:    :*%%%*:%%%%SS%SSSSSSSS::++S%",
+    "****++++*+**+++++++%+**%%%%%SSSSSSSSSSSSSSSS%:             .*%SS%*...:+%%%S%+*%%SS##S##S##SSS**++%%.",
+    "+*%*++++*+**+:::+*%%%%%%%SSSSSSSSSSSSSSSSSS*                     +**%*:.:::+%SSS%SS*SS###SSSSS**+*%%",
+    "******+*****+:++%S%%%%SS%%%SSSSSSSSSSSSSS%.                           ++++::%*%SSSS :%#S##SSSS +%+%S%.",
+    "+::::++***%%**%%*S%%%%%SSSSSSSSSS#SSSS%*                                 +*+*+**%S@:  %SS#SSSS. +%**S%",
+    "::::::+++*%%S%%%%%%%%%%%SSSS##SSSSS%%:                                     ***%S%S*S. .%S#@SSS*   .++:",
+    "::::+++***%%%%%%%%%%%%%%SSSSS#SS%*.                                        .SSSS::.%*  :S###SS*",
+    "+::+***%%%%S%%%%*%%%%%SSSS%%%*:                                            :%S%*%%+%:  .SS@SSS%",
+    "*++*%*%S%SSSSSSS%SSSSSSS%*+                                                 +%:  ::     +%S.*%S",
+    "%%%%S%SSSSSSSS#SSSSSS%*:",
+    "SSSSSSSSSSSSSSSSSSS%+.",
+    "SSSSSSSSSSSSSSSS**:",
+    "SSSSSSSSSSSS%+:",
+    "#SSS#SS%*+:.",
+    "+++:."
+  ];
+
+  const ASCII_RIGHT = [
+    "                                                                                                 :++**",
+    "                                                                                           :+*+*+::+**",
+    "                                                                                    :+++***++:..::.**+",
+    "                                                                              :::::+:::.:::::::::::++*",
+    "                                                             :++:++:++::::++**+:::::::::::++:+++:.:+++",
+    "                                                  :++:+:*+*+++.:.:::..:.:+:+:::::::::::::++++:.:*:*%%%",
+    "                                   ::::+++*+***++*:...::++:::...:::.:::+++:++:::::..:::::::::+**%*%%%%",
+    "                              .::::+.:+::::.*:*::::.::::+*+:.:.:+%%%%%+++++++:+::::..:+++++*+****%%%%%",
+    "        ::::++++++::+++:::+::::.:...+*...::*:+**:...:+SSSSSSSSSSSSSS%*++++++++++::::+:+++++++++:+..:.:",
+    "  ::+::+*+:::*:.:::+%%:...::++*+++**:::.:+*:::*%*++*%%**SSSSSSSSSSS%%+*+::::++++++++::+++:.:.:.::.::::",
+    " .%++++*%%%%SSS%****%% .%. +%%%%S%*...:.++..:+*SS@@#%*%%%%%SSSSSS%%S%*++++:++++++++::::............:++",
+    "  :%%SSSS%%%%%*+%%SS#S*:**:.%S#S+ .::+++::::*%SSS@@#SS%SS%****+**%%%%%%**%%%***%**+**++:::::::::::++*%",
+    "                      *SSSS*%%%.::.:+%%:.:+*%%SSS@@@#S%%S%%%*%%SSS%S%%%S%%%%%%%%%%*********+:+***+*%%%",
+    "                       +SSS%+ :::*+%%%%****%%SSSS#@##S%S%%%%%%%%%%%%SS%%%%%%%%%%%%%%%%%%%%%%*%%%%%%%%%",
+    "                     :*%+%.:.:+*%%SSS%%%%%%%S%SS%#SSSS%SS%%%%%%%%%%#S%%%%%%%%%%S%%%%%%%%SS%S%S%%SSSSSS",
+    "                  +*%+*:***+*%SSSS%SSSSSSSSS#SSSS##SS%*++++**%S%SSSS%%%%%%%%%%%SSSSSSSSS#SSSSSSSSSSS#S",
+    "                 %+. +*+**%%SS%*. :%S%S##########@S%*.        .+***%%%%%%SSSSSSSSSSSS#@#@#@@@@#@@@@@@#",
+    "                 +*%**+*%%S*++%%*:.++%*:*%SSS#SS%+                   :::++************%SSSSSSSSS#S#S#S",
+    "                  :%%%SS#*::*%%%%%%%+:*%%%SSS%*:                                        .::**%%S####SS",
+    "                   ++%S#**%SS%+.+:*%#%%%%%*:                                                    ....",
+    "                  +**%S#.++S% .**%%SS",
+    "                  +*%SS***%%. :+%%SS",
+    "                   *+%#+%*%:  +%*%S+",
+    "                   ++*#.*%S   .*+:%+",
+    "                   *%#S+S*:    +:*+",
+    "                   .:: ::"
+  ];
 
   /* --- State --- */
-  let W = 0, H = 0, sideW = 0;
+  let W = 0, H = 0;
   let grid = [];
   let mouseX = -9999, mouseY = -9999;
-  let t = 0;
   let rafId = null;
-
-  /* --- Image loading --- */
-  const imgL = new Image(), imgR = new Image();
-  imgL.src = 'assets/god-hand-rodape-left.png';
-  imgR.src = 'assets/god-hand-rodape-right.png';
-  let okL = false, okR = false;
-  imgL.onload = () => { okL = true; if (okR) build(); };
-  imgR.onload = () => { okR = true; if (okL) build(); };
-
-  /* Sample an image to an offscreen canvas and return pixel data */
-  function sampleImg(img, w, h) {
-    const off = document.createElement('canvas');
-    off.width = w; off.height = h;
-    const oc = off.getContext('2d');
-    oc.drawImage(img, 0, 0, w, h);
-    return oc.getImageData(0, 0, w, h).data;
-  }
 
   function build() {
     const rect = wrapper.getBoundingClientRect();
     W = rect.width;
     H = rect.height;
-    sideW = W * SIDE_RATIO;
 
-    /* Resize canvas respecting DPR */
     const dpr = window.devicePixelRatio || 1;
     canvas.width  = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    /* Compute displayed image sizes: height fills wrapper, width auto */
-    const aspL  = imgL.naturalWidth / imgL.naturalHeight;
-    const dispLW = Math.round(H * aspL),  dispLH = H;
-
-    const aspR  = imgR.naturalWidth / imgR.naturalHeight;
-    const dispRW = Math.round(H * aspR), dispRH = H;
-
-    /* Sample at capped resolution to avoid slow getImageData on huge images */
-    const maxPx = 800;
-    const scL = Math.min(1, maxPx / dispLW);
-    const sLW = Math.round(dispLW * scL), sLH = Math.round(dispLH * scL);
-    const dataL = sampleImg(imgL, sLW, sLH);
-
-    const scR = Math.min(1, maxPx / dispRW);
-    const sRW = Math.round(dispRW * scR), sRH = Math.round(dispRH * scR);
-    const dataR = sampleImg(imgR, sRW, sRH);
-
-    /* Right image left-edge in canvas coords */
-    const rImgX0 = W - dispRW;
-
     grid = [];
-    const cols = Math.floor(W / CELL_W);
-    const rows = Math.floor(H / CELL_H);
+    
+    // Configurações de layout
+    const isMobile = W < 768;
+    // Reduzido para dar mais espaço no centro
+    const maxHandW = isMobile ? W * 0.40 : W * 0.35;
+    
+    // Left hand max width based on lines
+    const maxCharsLeft = Math.max(...ASCII_LEFT.map(line => line.length));
+    const maxCharsRight = Math.max(...ASCII_RIGHT.map(line => line.length));
+    
+    // Cell size computation so it fits within the allowed width and height
+    const cellW_left = maxHandW / maxCharsLeft;
+    const cellH_left = H / ASCII_LEFT.length;
+    const cellW_right = maxHandW / maxCharsRight;
+    const cellH_right = H / ASCII_RIGHT.length;
+    
+    // Use a fixed aspect ratio for chars (width is usually ~0.6 of height for monospace)
+    // We constrain the character size to fit both constraints (width and height)
+    const fontSizeLeft = Math.min(cellW_left / 0.6, cellH_left);
+    const fontSizeRight = Math.min(cellW_right / 0.6, cellH_right);
+    
+    // Let's use the same font size for both hands to look uniform
+    const fontSize = Math.min(fontSizeLeft, fontSizeRight, 14); // cap at 14px
+    const cellW = fontSize * 0.6;
+    const cellH = fontSize;
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const cx = (c + 0.5) * CELL_W;
-        const cy = (r + 0.5) * CELL_H;
-
-        let brightness = 0;
-
-        if (cx < sideW) {
-          /* Left zone — image anchored at x=0 */
-          const ix = Math.round((cx / dispLW) * sLW);
-          const iy = Math.round((cy / dispLH) * sLH);
-          if (ix >= 0 && ix < sLW && iy >= 0 && iy < sLH) {
-            const k = (iy * sLW + ix) * 4;
-            brightness = (dataL[k] * 0.299 + dataL[k+1] * 0.587 + dataL[k+2] * 0.114) / 255;
-          }
-        } else if (cx > W - sideW) {
-          /* Right zone — image anchored at right edge */
-          const ix = Math.round(((cx - rImgX0) / dispRW) * sRW);
-          const iy = Math.round((cy / dispRH) * sRH);
-          if (ix >= 0 && ix < sRW && iy >= 0 && iy < sRH) {
-            const k = (iy * sRW + ix) * 4;
-            brightness = (dataR[k] * 0.299 + dataR[k+1] * 0.587 + dataR[k+2] * 0.114) / 255;
-          }
-        } else {
-          continue; /* center zone: skip — stays black */
-        }
-
-        if (brightness > THRESHOLD) {
-          const ci = Math.min(CHAR_SET.length - 1, Math.floor(brightness * (CHAR_SET.length - 1)));
+    // Center vertically at the bottom
+    const startY_left = H - (ASCII_LEFT.length * cellH);
+    const startY_right = H - (ASCII_RIGHT.length * cellH);
+    
+    // Left Hand (aligned left)
+    for (let r = 0; r < ASCII_LEFT.length; r++) {
+      const line = ASCII_LEFT[r];
+      for (let c = 0; c < line.length; c++) {
+        const char = line[c];
+        if (char !== ' ') {
+          const cx = c * cellW;
+          const cy = startY_left + r * cellH;
           grid.push({
+            baseChar: char,
+            currentChar: char,
+            x: cx, y: cy,
             baseX: cx, baseY: cy,
-            x: cx,     y: cy,
-            vx: 0,     vy: 0,
-            density: brightness,
-            baseChar:    CHAR_SET[ci],
-            currentChar: CHAR_SET[ci],
             hl: 0
           });
         }
       }
     }
+
+    // Right Hand (aligned right)
+    // Right hand needs to start at W - (maxCharsRight * cellW)
+    const startX_right = W - (maxCharsRight * cellW);
+    for (let r = 0; r < ASCII_RIGHT.length; r++) {
+      const line = ASCII_RIGHT[r];
+      for (let c = 0; c < line.length; c++) {
+        const char = line[c];
+        if (char !== ' ') {
+          const cx = startX_right + c * cellW;
+          const cy = startY_right + r * cellH;
+          grid.push({
+            baseChar: char,
+            currentChar: char,
+            x: cx, y: cy,
+            baseX: cx, baseY: cy,
+            hl: 0
+          });
+        }
+      }
+    }
+    
+    ctx.font = `${Math.max(8, fontSize)}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
   }
 
   /* --- Render loop --- */
   function render() {
     rafId = requestAnimationFrame(render);
     ctx.clearRect(0, 0, W, H);
-
-    ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    t += 0.002;
+    t += 0.001; // Tempo mais lento
 
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      /* Mouse proximity (Scramble effect only, no physical deformation) */
       const dx = p.x - mouseX, dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < HOVER_R && dist > 0) {
         const f = 1 - dist / HOVER_R;
-        p.hl  = Math.max(p.hl, f);
-        /* faster glyph scramble near cursor */
-        if (Math.random() < f * 0.85)
-          p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
-      } else {
-        p.hl *= 0.88;
-        if (p.hl < 0.02) {
-          p.hl = 0;
-          /* Perlin-driven slow organic mutation */
-          const n = noise(p.baseX * 0.014 + t, p.baseY * 0.014 + t * 0.6);
-          if (n > 0.32)
+        p.hl = Math.max(p.hl, f);
+        /* Scramble com velocidade média/lenta e área maior */
+        const n = noise(p.baseX * 0.02 + t, p.baseY * 0.02 + t);
+        if (n > 0.3) {
+          if (Math.random() < 0.20) { // Aumentado de 0.05 para 0.20 (mais rápido)
             p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
-          else if (Math.random() < 0.025)
-            p.currentChar = p.baseChar;
+          }
+        } else {
+          if (Math.random() < 0.15) p.currentChar = p.baseChar;
+        }
+      } else {
+        // Slow decay for the color shift
+        p.hl *= 0.96; 
+        if (p.hl < 0.01) {
+          p.hl = 0;
+        }
+        /* Noise orgânico para voltar ao caractere original */
+        const n = noise(p.baseX * 0.014 + t, p.baseY * 0.014 + t * 0.6);
+        if (n > 0.4 && p.hl > 0) {
+          if (Math.random() < 0.15) {
+            p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
+          }
+        } else if (Math.random() < 0.25) {
+          p.currentChar = p.baseChar;
         }
       }
 
-      // resting state is darker gray, hover state brightens up to bright blue
-      const r_c = 255 - (p.hl * 195); // 255 -> 60
-      const g_c = 255 - (p.hl * 95);  // 255 -> 160
-      const b_c = 255;                // 255 -> 255
-      const alpha = Math.min(1, (p.density * 0.20) + (p.hl * 0.8));
+      // Base color: white with some opacity so it looks like the old ASCII overlay
+      const baseR = 255, baseG = 255, baseB = 255, baseA = 0.5;
+      
+      // Target color (Navy blue: #000080 -> rgb(0,0,128))
+      const targetR = 0, targetG = 0, targetB = 128, targetA = 0.9;
 
-      ctx.fillStyle = `rgba(${r_c.toFixed(0)},${g_c.toFixed(0)},${b_c.toFixed(0)},${alpha.toFixed(3)})`;
+      const r_c = baseR + (targetR - baseR) * p.hl;
+      const g_c = baseG + (targetG - baseG) * p.hl;
+      const b_c = baseB + (targetB - baseB) * p.hl;
+      const a_c = baseA + (targetA - baseA) * p.hl;
+
+      ctx.fillStyle = `rgba(${Math.round(r_c)},${Math.round(g_c)},${Math.round(b_c)},${a_c.toFixed(3)})`;
       ctx.fillText(p.currentChar, p.x, p.y);
     }
   }
 
   /* --- Mouse tracking & Parallax --- */
-  const parallaxTargets = wrapper.querySelectorAll('.god-hand-side, #asciiHandsCanvas');
+  const parallaxTargets = wrapper.querySelectorAll('#asciiHandsCanvas');
 
   wrapper.addEventListener('mousemove', e => {
     const r = canvas.getBoundingClientRect();
@@ -982,22 +1037,26 @@ function initAsciiHands() {
     const moveX = ((mouseX - centerX) / centerX) * -16;
     const moveY = ((mouseY - centerY) / centerY) * -16;
 
-    gsap.to(parallaxTargets, {
-      x: moveX,
-      y: moveY,
-      duration: 0.6,
-      ease: 'power2.out'
-    });
+    if (typeof gsap !== 'undefined') {
+      gsap.to(parallaxTargets, {
+        x: moveX,
+        y: moveY,
+        duration: 0.6,
+        ease: 'power2.out'
+      });
+    }
   });
 
   wrapper.addEventListener('mouseleave', () => { 
     mouseX = -9999; mouseY = -9999; 
-    gsap.to(parallaxTargets, {
-      x: 0,
-      y: 0,
-      duration: 1.0,
-      ease: 'power3.out'
-    });
+    if (typeof gsap !== 'undefined') {
+      gsap.to(parallaxTargets, {
+        x: 0,
+        y: 0,
+        duration: 1.0,
+        ease: 'power3.out'
+      });
+    }
   });
 
   /* --- Resize (debounced) --- */
@@ -1005,17 +1064,14 @@ function initAsciiHands() {
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (okL && okR) {
-        grid = [];
-        if (rafId) cancelAnimationFrame(rafId);
-        build();
-        rafId = requestAnimationFrame(render);
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      build();
+      rafId = requestAnimationFrame(render);
     }, 150);
   });
 
   /* Start */
-  if (okL && okR) build();
+  build();
   rafId = requestAnimationFrame(render);
 }
 
