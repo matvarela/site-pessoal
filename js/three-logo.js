@@ -68,14 +68,21 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updateLogoScaleForMobile();
 }
+
+function updateLogoScaleForMobile() {
+  if (window.innerWidth < 768) {
+    logoGroup.scale.set(0.03, 0.03, 0.03); // Slightly larger on mobile
+  } else {
+    logoGroup.scale.set(0.05, 0.05, 0.05);
+  }
+}
+
 
 // 7. Handle Mouse Interaction (Floating/Rotation Effect & Click)
 const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
-let isSpinning = false; // For mousedown spin effect
-let baseRotationY = 0; // Accumulated spin rotation
-
 window.addEventListener('mousemove', (e) => {
   // Normalize mouse coordinates from -1 to 1
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -98,9 +105,15 @@ let isMouseDown = false;
 let returnTween = null;
 let spinTween = null;
 
-window.addEventListener('mousedown', (e) => {
-  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+function handleDown(e) {
+  let clientX = e.clientX;
+  let clientY = e.clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+  mouse.x = (clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
 
@@ -119,9 +132,12 @@ window.addEventListener('mousedown', (e) => {
       });
     }
   }
-});
+}
 
-window.addEventListener('mouseup', (e) => {
+window.addEventListener('mousedown', handleDown);
+window.addEventListener('touchstart', handleDown);
+
+function handleUp() {
   if (isMouseDown && logoMesh) {
     isMouseDown = false;
     if (spinTween) spinTween.kill();
@@ -134,7 +150,11 @@ window.addEventListener('mouseup', (e) => {
       overwrite: "auto"
     });
   }
-});
+}
+
+window.addEventListener('mouseup', handleUp);
+window.addEventListener('touchend', handleUp);
+window.addEventListener('mouseleave', handleUp);
 
 // 8. Render Loop
 renderer.setAnimationLoop((time) => {
@@ -148,15 +168,14 @@ function setupGSAPWaypoints() {
   // Let's set some reasonable positions for a camera at z=10, fov=45
 
   // A. Set Initial State (Right side of the Hero section)
+  const isMobile = window.innerWidth < 768;
   gsap.set(logoGroup.position, {
-      x: 3.5,
-      y: 0.5,
+      x: isMobile ? 1.0 : 3.5, // Closer to center on mobile
+      y: isMobile ? 1.2 : 0.5,
       z: 0
   });
 
-  gsap.set(logoGroup.scale, {
-      x: 0.05, y: 0.05, z: 0.05
-  });
+  updateLogoScaleForMobile();
 
   // B. Create the Timeline linked to scroll
   const tl = gsap.timeline({
@@ -172,7 +191,7 @@ function setupGSAPWaypoints() {
 
   // Waypoint 1: Move left and rotate
   tl.to(logoGroup.position, {
-    x: -3,
+    x: isMobile ? -1.0 : -3, // Closer to center
     y: 0,
     ease: "power1.inOut"
   }, 0);
@@ -184,7 +203,7 @@ function setupGSAPWaypoints() {
 
   // Waypoint 2: Move right and down
   tl.to(logoGroup.position, {
-    x: 3,
+    x: isMobile ? 1.0 : 3, // Closer to center
     y: -1,
     ease: "power1.inOut"
   }, ">");
@@ -197,7 +216,7 @@ function setupGSAPWaypoints() {
   // Waypoint 3: Move to center bottom (footer area)
   tl.to(logoGroup.position, {
     x: 0,
-    y: -2, // Move down
+    y: isMobile ? -1 : -2, // Move down
     ease: "power2.out"
   }, ">");
 
