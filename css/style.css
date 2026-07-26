@@ -1248,34 +1248,174 @@ button:focus-visible {
   left: 50%;
   margin-left: -50vw;
   margin-top: 24px;
-  height: clamp(320px, 45vw, 650px);
+  height: clamp(260px, 36vw, 560px);
   overflow: hidden;
   background: #000;
   user-select: none;
 }
 
-/* Side containers — clip each hand image to its 38% zone */
-.god-hand-side {
+
+
+/* Canvas: transparent ASCII overlay on top of images */
+#asciiHandsCanvas {
   position: absolute;
   top: 0;
-  bottom: 0;
-  width: 38%;
-  overflow: hidden;
-  z-index: 0;
-}
-.god-hand-side--left  { left: 0; }
-.god-hand-side--right { right: 0; }
-
-.god-hand-side-img {
-  position: absolute;
-  bottom: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
-  display: block;
   pointer-events: none;
+  z-index: 1;
+  display: block;
 }
-.god-hand-side--left  .god-hand-side-img { left: 0; }
-.god-hand-side--right .god-hand-side-img { right: 0; }
+
+/* "Olá! Vamos falar" — topmost layer, centered at bottom */
+.god-hand-wrapper .contact-headline {
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 2;
+  pointer-events: auto;
+  padding: 0 clamp(16px, 4vw, 80px);
+  .hero-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .hero-desc { max-width: 100%; }
+  .hero-right {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .pill {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.35;
+  }
+  .scroll-hint { display: none; }
+
+  #stats,
+  #experience,
+  #about,
+  #contact { padding: 72px var(--pad-x); }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stat-card {
+    min-height: 132px;
+    padding: 24px 16px;
+    min-width: 0;
+  }
+  .stat-value {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    letter-spacing: 0.01em;
+  }
+  .stat-label {
+    max-width: none;
+    letter-spacing: 0.06em;
+  }
+
+  .s-header {
+    margin-bottom: 36px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .pcard-inner { grid-template-columns: 1fr; }
+  .pcard-vis {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    min-height: auto;
+    padding: 24px 20px;
+  }
+  .pcard-info { padding: 24px 20px; }
+  .pcard-metrics {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .pm-val { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-top: 40px;
+  }
+  .about-bio p { max-width: none; }
+
+  .contact-headline { margin: 36px 0 48px; }
+  .contact-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+  .cf-email-row {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .cf-email-row p,
+  #cfEmail {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --pad-x: 16px;
+    --title-tracking: 0.01em;
+    --title-hero: clamp(2.25rem, 13vw, 3.5rem);
+    --title-section: clamp(1.85rem, 11vw, 2.75rem);
+    --title-contact: clamp(1.85rem, 12vw, 3rem);
+  }
+
+  .hero-title { font-size: var(--title-hero); }
+  .s-title { font-size: var(--title-section); }
+  .contact-headline { font-size: var(--title-contact); }
+
+  .nav-logo-mark { width: 44px; height: 25px; }
+  .theme-btn { padding: 6px 8px; min-width: 40px; }
+
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-card { min-height: 120px; padding: 22px 16px; }
+
+  .hero-eyebrow { letter-spacing: 0.06em; }
+  .s-label { letter-spacing: 0.06em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .sh-line::after { animation: none; }
+  .pill-dot { animation: none; }
+  .hero-title .tl span,
+  .hero-eyebrow span,
+  .s-title .tl span { transform: none; }
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+
+
+/* ============================================================
+   RODAPÉ ASCII HANDS — 3-layer architecture
+   Layer 0: static images (clipped to left/right 38%)
+   Layer 1: #asciiHandsCanvas (transparent, pointer-events:none)
+   Layer 2: .contact-headline (text on top, pointer-events:auto)
+   ============================================================ */
+
+
 
 /* Canvas: transparent ASCII overlay on top of images */
 #asciiHandsCanvas {
@@ -1302,8 +1442,63 @@ button:focus-visible {
 }
 
 /* ============================================================
-   3D Spline Logo Background Overlay
+   3D Spline Logo — Container (Fixed, Floating & Interactive)
    ============================================================ */
+<<<<<<< HEAD
+#splineContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 420px;
+  height: 420px;
+  z-index: 10;          /* Acima do fundo do main, abaixo do nav (z-index: 100) */
+  pointer-events: auto; /* Permite rotação 360 interativa ao arrastar/passar o mouse */
+  cursor: grab;
+  will-change: transform;
+  opacity: 0;           /* Revela suavemente após o Spline carregar */
+  transition: opacity 0.6s ease;
+  user-select: none;
+}
+
+#splineContainer:active {
+  cursor: grabbing;
+}
+
+#splineContainer.is-loaded {
+  opacity: 1;
+}
+
+.spline-inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+#splineContainer #splineCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: transparent !important;
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  #splineContainer {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+/* Garante que nav fique no topo máximo */
+nav {
+  position: fixed;
+  z-index: 100;
+}
+main {
+  position: relative;
+  z-index: 3;
+=======
 #canvas-container {
   position: fixed;
   top: 0;
@@ -1320,4 +1515,5 @@ button:focus-visible {
   width: 100%;
   height: 100%;
   display: block;
+>>>>>>> origin/feature/spline-3d-logo
 }

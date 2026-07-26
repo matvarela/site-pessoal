@@ -22,23 +22,9 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
-  <link rel="stylesheet" href="css/style.css?v=20260724-spline-v1">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://esm.sh/three@0.161.0",
-        "three/examples/jsm/controls/OrbitControls.js": "https://esm.sh/three@0.161.0/examples/jsm/controls/OrbitControls.js",
-        "three/examples/jsm/loaders/GLTFLoader.js": "https://esm.sh/three@0.161.0/examples/jsm/loaders/GLTFLoader.js"
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="css/style.css?v=20260726-ascii-v5">
 </head>
 <body class="is-loading">
-  <!-- 3D Logo Canvas (Fixed, Low z-index) -->
-  <div id="canvas-container" aria-hidden="true">
-    <canvas id="splineCanvas"></canvas>
-  </div>
-
 
   <!-- Preloader — logo + percentual -->
   <div id="preloader" aria-hidden="true" role="status" aria-label="Carregando">
@@ -179,14 +165,7 @@
 
       <!-- ASCII Hands Footer: static images + canvas overlay -->
       <div class="god-hand-wrapper">
-        <!-- Background: static hand images clipped to each side -->
-        <div class="god-hand-side god-hand-side--left">
-          <img src="assets/god-hand-rodape-left.png" class="god-hand-side-img" alt="" aria-hidden="true" decoding="async">
-        </div>
-        <div class="god-hand-side god-hand-side--right">
-          <img src="assets/god-hand-rodape-right.png" class="god-hand-side-img" alt="" aria-hidden="true" decoding="async">
-        </div>
-        <!-- Canvas: ASCII overlay, transparent bg, pointer-events none -->
+        <!-- Canvas: Static ASCII art with interactive hover -->
         <canvas id="asciiHandsCanvas" aria-hidden="true"></canvas>
         <!-- Text: highest layer -->
         <div class="contact-headline">
@@ -233,8 +212,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="js/data.js?v=20260724-spline-v1"></script>
-  <script src="js/main.js?v=20260724-spline-v1"></script>
-  <script type="module" src="js/three-logo.js?v=20260724-spline-v1"></script>
+  <script src="js/data.js?v=20260726-ascii-v5"></script>
+  <script src="js/main.js?v=20260726-ascii-v5"></script>
 </body>
 </html>
