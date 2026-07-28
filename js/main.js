@@ -782,41 +782,9 @@ function initAsciiHands() {
   /* --- Config --- */
   const CELL_W    = 10;
   const CELL_H    = 14;
-  const SIDE_RATIO = 0.38;   // each hand occupies 38% of wrapper width
   const THRESHOLD  = 0.02;   // minimum brightness to render a char
   const HOVER_R    = 160;    // mouse influence radius (px)
   const CHAR_SET   = ['.', ':', ';', '-', '=', '+', 'x', '#', '%', '@', '$'];
-  const SCRAMBLE   = ['@','#','%','&','$','8','0','X','Z','?','!','+','*','x','~',';',':','.'];
-
-  /* --- Perlin Noise (simple 2D, no lib) --- */
-  const _pArr = new Uint8Array(256);
-  for (let i = 0; i < 256; i++) _pArr[i] = i;
-  for (let i = 255; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = _pArr[i]; _pArr[i] = _pArr[j]; _pArr[j] = tmp;
-  }
-  const perm = new Uint8Array(512);
-  for (let i = 0; i < 512; i++) perm[i] = _pArr[i & 255];
-
-  function fade(t)        { return t * t * t * (t * (t * 6 - 15) + 10); }
-  function lerp(a, b, t)  { return a + t * (b - a); }
-  function grad(h, x, y)  {
-    h &= 3;
-    const u = h < 2 ? x : y;
-    const v = h < 2 ? y : x;
-    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
-  }
-  function noise(x, y) {
-    const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
-    x -= Math.floor(x); y -= Math.floor(y);
-    const u = fade(x), v = fade(y);
-    const a = perm[X] + Y, b = perm[X + 1] + Y;
-    return lerp(
-      lerp(grad(perm[a],     x,     y),   grad(perm[b],     x - 1, y),   u),
-      lerp(grad(perm[a + 1], x,     y - 1), grad(perm[b + 1], x - 1, y - 1), u),
-      v
-    );
-  }
 
   /* --- State --- */
   let W = 0, H = 0, sideW = 0;
@@ -846,7 +814,13 @@ function initAsciiHands() {
     const rect = wrapper.getBoundingClientRect();
     W = rect.width;
     H = rect.height;
-    sideW = W * SIDE_RATIO;
+
+    // Match CSS media queries for side width
+    let sideRatio = 0.38;
+    if (window.innerWidth <= 900) {
+      sideRatio = 0.50;
+    }
+    sideW = W * sideRatio;
 
     /* Resize canvas respecting DPR */
     const dpr = window.devicePixelRatio || 1;
@@ -854,12 +828,24 @@ function initAsciiHands() {
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    /* Compute displayed image sizes: height fills wrapper, width auto */
+    /* Compute displayed image sizes */
     const aspL  = imgL.naturalWidth / imgL.naturalHeight;
-    const dispLW = Math.round(H * aspL),  dispLH = H;
-
     const aspR  = imgR.naturalWidth / imgR.naturalHeight;
-    const dispRW = Math.round(H * aspR), dispRH = H;
+    let dispLW, dispLH, dispRW, dispRH;
+
+    if (window.innerWidth <= 900) {
+      // In mobile, width is 100% of sideW, height auto
+      dispLW = sideW;
+      dispLH = Math.round(dispLW / aspL);
+      dispRW = sideW;
+      dispRH = Math.round(dispRW / aspR);
+    } else {
+      // Height fills wrapper, width auto
+      dispLW = Math.round(H * aspL);
+      dispLH = H;
+      dispRW = Math.round(H * aspR);
+      dispRH = H;
+    }
 
     /* Sample at capped resolution to avoid slow getImageData on huge images */
     const maxPx = 800;
@@ -888,15 +874,30 @@ function initAsciiHands() {
         if (cx < sideW) {
           /* Left zone — image anchored at x=0 */
           const ix = Math.round((cx / dispLW) * sLW);
-          const iy = Math.round((cy / dispLH) * sLH);
+          let iy = 0;
+          if (window.innerWidth <= 900) {
+            // Image is vertically centered
+            const topOffset = (H - dispLH) / 2;
+            iy = Math.round(((cy - topOffset) / dispLH) * sLH);
+          } else {
+            iy = Math.round((cy / dispLH) * sLH);
+          }
           if (ix >= 0 && ix < sLW && iy >= 0 && iy < sLH) {
             const k = (iy * sLW + ix) * 4;
             brightness = (dataL[k] * 0.299 + dataL[k+1] * 0.587 + dataL[k+2] * 0.114) / 255;
           }
         } else if (cx > W - sideW) {
           /* Right zone — image anchored at right edge */
+          const rImgX0 = W - (window.innerWidth <= 900 ? sideW : dispRW);
           const ix = Math.round(((cx - rImgX0) / dispRW) * sRW);
-          const iy = Math.round((cy / dispRH) * sRH);
+          let iy = 0;
+          if (window.innerWidth <= 900) {
+            // Image is vertically centered
+            const topOffset = (H - dispRH) / 2;
+            iy = Math.round(((cy - topOffset) / dispRH) * sRH);
+          } else {
+            iy = Math.round((cy / dispRH) * sRH);
+          }
           if (ix >= 0 && ix < sRW && iy >= 0 && iy < sRH) {
             const k = (iy * sRW + ix) * 4;
             brightness = (dataR[k] * 0.299 + dataR[k+1] * 0.587 + dataR[k+2] * 0.114) / 255;
@@ -934,28 +935,21 @@ function initAsciiHands() {
     for (let i = 0; i < grid.length; i++) {
       const p = grid[i];
 
-      /* Mouse proximity (Scramble effect only, no physical deformation) */
+      /* Mouse proximity (highlight only) */
       const dx = p.x - mouseX, dy = p.y - mouseY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < HOVER_R && dist > 0) {
         const f = 1 - dist / HOVER_R;
         p.hl  = Math.max(p.hl, f);
-        /* faster glyph scramble near cursor */
-        if (Math.random() < f * 0.85)
-          p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
       } else {
         p.hl *= 0.88;
         if (p.hl < 0.02) {
           p.hl = 0;
-          /* Perlin-driven slow organic mutation */
-          const n = noise(p.baseX * 0.014 + t, p.baseY * 0.014 + t * 0.6);
-          if (n > 0.32)
-            p.currentChar = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
-          else if (Math.random() < 0.025)
-            p.currentChar = p.baseChar;
         }
       }
+
+      p.currentChar = p.baseChar;
 
       // resting state is darker gray, hover state brightens up to bright blue
       const r_c = 255 - (p.hl * 195); // 255 -> 60

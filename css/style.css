@@ -1301,23 +1301,23 @@ button:focus-visible {
   padding: 0 clamp(16px, 4vw, 80px);
 }
 
-/* ============================================================
-   3D Spline Logo Background Overlay
-   ============================================================ */
-#canvas-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
+@media (max-width: 900px) {
+  .god-hand-wrapper {
+    height: clamp(240px, 60vw, 400px);
+  }
+  .god-hand-side {
+    width: 50%;
+  }
+  .god-hand-side-img {
+    height: auto;
+    width: 100%;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
 }
 
-#splineCanvas {
-  pointer-events: auto;
-  width: 100%;
-  height: 100%;
-  display: block;
+@media (max-width: 480px) {
+  .god-hand-wrapper {
+    height: clamp(200px, 50vw, 300px);
+  }
 }
