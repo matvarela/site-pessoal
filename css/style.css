@@ -32,16 +32,6 @@
   --subtitle-tracking: 0.02em;      /* subtítulos Inter: leve abertura */
 }
 
-[data-theme="light"] {
-  --bg: #ffffff;
-  --bg2: #f5f5f5;
-  --fg: #000000;
-  --muted: #5a5a5a;
-  --border: rgba(0, 0, 0, 0.1);
-  --border-hover: rgba(0, 0, 0, 0.38);
-  --accent: #000000;
-}
-
 /* ============================================================
    RESET
    ============================================================ */
@@ -193,10 +183,6 @@ nav.scrolled {
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
-[data-theme="light"] nav.scrolled {
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-}
 
 .nav-logo {
   display: inline-flex;
@@ -214,9 +200,6 @@ nav.scrolled {
   display: block;
   object-fit: contain;
   object-position: center;
-}
-[data-theme="light"] .nav-logo-mark {
-  filter: invert(1);
 }
 .nav-logo-divider {
   width: 1px;
@@ -272,26 +255,6 @@ nav.scrolled {
 .nav-links a.active { color: var(--fg); }
 .nav-links a:hover::after,
 .nav-links a.active::after { width: 100%; }
-
-.theme-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid var(--border);
-  padding: 7px 15px;
-  min-height: 44px;
-  color: var(--muted);
-  font-family: var(--font-en);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-.theme-btn:hover {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
-}
 
 .nav-toggle {
   display: none;
@@ -484,9 +447,6 @@ body.menu-open {
 .pill.available {
   border-color: rgba(255, 255, 255, 0.28);
   color: var(--fg);
-}
-[data-theme="light"] .pill.available {
-  border-color: rgba(0, 0, 0, 0.28);
 }
 .pill-dot {
   width: 6px;
@@ -1063,13 +1023,6 @@ body.menu-open {
 
   .nav-right { gap: 10px; flex-shrink: 0; }
 
-  .theme-btn {
-    padding: 7px 10px;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
-  .theme-btn #tLabel { display: none; }
-
   .nav-toggle { display: flex; }
   .nav-links { display: none !important; }
 
@@ -1093,10 +1046,6 @@ body.menu-open {
     background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-  }
-  nav.menu-open .theme-btn {
-    visibility: hidden;
-    pointer-events: none;
   }
 
   #hero {
@@ -1206,7 +1155,6 @@ body.menu-open {
   .contact-headline { font-size: var(--title-contact); }
 
   .nav-logo-mark { width: 44px; height: 25px; }
-  .theme-btn { padding: 6px 8px; min-width: 40px; }
 
   .stats-grid { grid-template-columns: 1fr; }
   .stat-card { min-height: 120px; padding: 22px 16px; }
@@ -1236,10 +1184,9 @@ button:focus-visible {
 
 
 /* ============================================================
-   RODAPÉ ASCII HANDS — 3-layer architecture
+   RODAPÉ HANDS — 2-layer architecture
    Layer 0: static images (clipped to left/right 38%)
-   Layer 1: #asciiHandsCanvas (transparent, pointer-events:none)
-   Layer 2: .contact-headline (text on top, pointer-events:auto)
+   Layer 1: .contact-headline (text on top, pointer-events:auto)
    ============================================================ */
 
 .god-hand-wrapper {
@@ -1277,18 +1224,6 @@ button:focus-visible {
 .god-hand-side--left  .god-hand-side-img { left: 0; }
 .god-hand-side--right .god-hand-side-img { right: 0; }
 
-/* Canvas: transparent ASCII overlay on top of images */
-#asciiHandsCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  display: block;
-}
-
 /* "Olá! Vamos falar" — topmost layer, centered at bottom */
 .god-hand-wrapper .contact-headline {
   position: absolute;
@@ -1301,23 +1236,3 @@ button:focus-visible {
   padding: 0 clamp(16px, 4vw, 80px);
 }
 
-/* ============================================================
-   3D Spline Logo Background Overlay
-   ============================================================ */
-#canvas-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
-}
-
-#splineCanvas {
-  pointer-events: auto;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
